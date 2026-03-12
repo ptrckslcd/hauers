@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress | Hauers</title>
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <script src="/js/theme-toggle.js"></script>
+</head>
+<body data-role="reviewee">
+
+  <!-- Ring gradient defs -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%"   stop-color="#FFD633"/>
+        <stop offset="50%"  stop-color="#FF9933"/>
+        <stop offset="100%" stop-color="#FF3366"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="app-shell">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="page-content">
+
+      <!-- ── Page header ── -->
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">My Progress</h1>
+          <p class="page-subtitle">Track your readiness scores, study activity, and milestones</p>
+        </div>
+        <div class="sp-header-chips">
+          <span class="sp-chip sp-chip--week" id="pg-level-chip">Professional</span>
+          <span class="sp-chip sp-chip--days" id="pg-days-chip">— days left</span>
+        </div>
+      </header>
+
+      <!-- ── Row 1: Readiness Ring · Score History · Study Stats ── -->
+      <div class="dash-grid">
+
+        <!-- Readiness Ring -->
+        <div class="dash-card">
+          <span class="card-label">Overall Readiness</span>
+          <p class="card-sub">Your current exam readiness score</p>
+          <div class="dash-ring-wrap">
+            <svg class="ring-svg" viewBox="0 0 130 130">
+              <circle class="ring-track" cx="65" cy="65" r="54"/>
+              <circle class="ring-prog"  cx="65" cy="65" r="54"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-value-row">
+                <span class="ring-pct" id="pg-ring-val">0</span>
+                <span class="ring-unit">%</span>
+              </div>
+              <span class="ring-note">Readiness</span>
+            </div>
+          </div>
+          <div id="pg-change-badge"></div>
+          <p class="card-footnote" id="pg-ring-footnote"></p>
+        </div>
+
+        <!-- Score History Sparkline -->
+        <div class="dash-card">
+          <span class="card-label">Score History</span>
+          <p class="card-sub">6-week readiness trend</p>
+          <div class="pg-spark-chart" id="pg-spark-chart"></div>
+        </div>
+
+        <!-- Study Activity Stats -->
+        <div class="dash-card">
+          <span class="card-label">Study Activity</span>
+          <p class="card-sub">Your overall study statistics</p>
+          <div class="pg-stat-grid" id="pg-stat-grid"></div>
+        </div>
+
+      </div>
+
+      <!-- ── Row 2: Domain Performance (full-width) ── -->
+      <div class="dash-card pg-domain-card">
+        <span class="card-label">Domain Performance</span>
+        <p class="card-sub">Compare baseline vs. current score across all domains</p>
+        <div class="pg-domain-rows" id="pg-domain-rows"></div>
+      </div>
+
+      <!-- ── Row 3: Quiz History + Achievements ── -->
+      <div class="dash-grid dash-grid--2col">
+
+        <div class="dash-card">
+          <span class="card-label">Recent Quizzes</span>
+          <p class="card-sub">Your last 5 quiz sessions</p>
+          <div class="pg-quiz-list" id="pg-quiz-list"></div>
+        </div>
+
+        <div class="dash-card">
+          <span class="card-label">Achievements</span>
+          <p class="card-sub">Milestones earned on your journey</p>
+          <div class="pg-ach-grid" id="pg-ach-grid"></div>
+        </div>
+
+      </div>
+
+      <!-- ── CTA ── -->
+      <div class="sp-cta">
+        <div>
+          <p class="sp-cta-title">Ready to keep improving?</p>
+          <p class="sp-cta-sub">Jump into a practice quiz or continue your study plan</p>
+        </div>
+        <div class="sp-cta-actions">
+          <a href="/reviewee/quiz"       class="cta-pill cta-pill--primary">Practice Quiz</a>
+          <a href="/reviewee/study-plan" class="cta-pill">View Study Plan</a>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/js/app-shell.js"></script>
+  <script>
+  (async () => {
+
+    /* ── Days-left chip ──────────────────────────────────── */
+    const examDate = new Date('2026-04-27');
+    const daysChip = document.getElementById('pg-days-chip');
+    if (daysChip) {
+      const days = Math.max(0, Math.ceil((examDate - new Date()) / (1000 * 60 * 60 * 24)));
+      daysChip.textContent = `${days} days left`;
+    }
+
+    /* ── Level chip ─────────────────────────────────────── */
+    try {
+      const ur = await fetch('/reviewee/api/user');
+      if (ur.ok) {
+        const u = await ur.json();
+        const chipEl = document.getElementById('pg-level-chip');
+        if (chipEl && u.examLevel) chipEl.textContent = u.examLevel;
+      }
+    } catch (_) {}
+
+    /* ── Fetch progress data ─────────────────────────────── */
+    let d;
+    try {
+      const r = await fetch('/reviewee/api/progress');
+      if (!r.ok) return;
+      d = await r.json();
+    } catch (_) { return; }
+
+    /* ── Readiness ring ──────────────────────────────────── */
+    const readPct = d.readinessScore ?? 0;
+    const circ    = 2 * Math.PI * 54;
+    const ringEl  = document.querySelector('.ring-prog');
+    const valEl   = document.getElementById('pg-ring-val');
+    if (ringEl) {
+      ringEl.style.strokeDasharray  = circ;
+      ringEl.style.strokeDashoffset = circ;
+      setTimeout(() => {
+        ringEl.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)';
+        ringEl.style.strokeDashoffset = circ * (1 - readPct / 100);
+      }, 200);
+    }
+    if (valEl) valEl.textContent = readPct;
+
+    /* ── Change badge ────────────────────────────────────── */
+    const badgeEl = document.getElementById('pg-change-badge');
+    if (badgeEl && d.readinessChange != null) {
+      const chg   = d.readinessChange;
+      const dir   = chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat';
+      const arrow = chg > 0 ? '▲' : chg < 0 ? '▼' : '→';
+      const sign  = chg > 0 ? '+' : '';
+      badgeEl.innerHTML = `<span class="pg-change ${dir}">${arrow} ${sign}${chg} pts this week</span>`;
+    }
+
+    /* ── Ring footnote ───────────────────────────────────── */
+    const footEl = document.getElementById('pg-ring-footnote');
+    if (footEl) {
+      const gap = Math.max(0, 80 - readPct);
+      footEl.textContent = gap > 0
+        ? `${gap} pts to passing score (80%)`
+        : 'Passing score achieved! 🎉';
+    }
+
+    /* ── Score history sparkline ─────────────────────────── */
+    const sparkEl = document.getElementById('pg-spark-chart');
+    if (sparkEl && d.scoreHistory?.length) {
+      const maxScore = Math.max(...d.scoreHistory.map(h => h.score));
+      const maxBarH  = 65;
+      const last     = d.scoreHistory.length - 1;
+      sparkEl.innerHTML = d.scoreHistory.map((h, i) => {
+        const barH = Math.max(4, Math.round((h.score / maxScore) * maxBarH));
+        const cur  = i === last;
+        return `<div class="pg-spark-col">` +
+          `<span class="pg-spark-val${cur ? ' current' : ''}">${h.score}</span>` +
+          `<div class="pg-spark-bar${cur ? ' current' : ''}" style="height:${barH}px"></div>` +
+          `<span class="pg-spark-label${cur ? ' current' : ''}">${h.week}</span>` +
+          `</div>`;
+      }).join('');
+    }
+
+    /* ── Study stats ─────────────────────────────────────── */
+    const statEl = document.getElementById('pg-stat-grid');
+    if (statEl && d.stats) {
+      const s = d.stats;
+      [
+        { num: s.totalQuizzes,   unit: '',     label: 'Quizzes Taken',  icon: '📝' },
+        { num: s.totalSessions,  unit: '',     label: 'Study Sessions', icon: '📅' },
+        { num: s.avgSessionMins, unit: ' min', label: 'Avg Session',    icon: '⏱' },
+        { num: s.totalQuestions, unit: '',     label: 'Questions Done', icon: '✅' },
+      ].forEach(it => {
+        const box = document.createElement('div');
+        box.className = 'pg-stat-box';
+        box.innerHTML =
+          `<span class="pg-stat-icon">${it.icon}</span>` +
+          `<span class="pg-stat-num">${it.num}<span class="pg-stat-unit">${it.unit}</span></span>` +
+          `<span class="pg-stat-label">${it.label}</span>`;
+        statEl.appendChild(box);
+      });
+    }
+
+    /* ── Domain performance ──────────────────────────────── */
+    const domEl = document.getElementById('pg-domain-rows');
+    if (domEl && d.domainProgress) {
+      domEl.innerHTML = d.domainProgress.map(dp => {
+        const delta = dp.current - dp.baseline;
+        const dir   = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+        const sign  = delta > 0 ? '+' : '';
+        const warn  = dp.current < 70;
+        const fillW = Math.min(100, Math.round((dp.current / dp.target) * 100));
+        return `<div class="pg-domain-row">` +
+          `<div class="pg-domain-header">` +
+          `<span class="pg-domain-dot" style="background:${dp.color}"></span>` +
+          `<span class="pg-domain-name">${dp.domain}</span>` +
+          `<span class="pg-domain-score-label${warn ? ' warn' : ''}">${dp.current}%</span>` +
+          `<span class="pg-domain-delta ${dir}">${sign}${delta}</span>` +
+          `</div>` +
+          `<div class="msc-bar-track">` +
+          `<div class="msc-bar-fill${warn ? ' warn' : ''} pg-bar-anim" style="width:0" data-w="${fillW}"></div>` +
+          `</div>` +
+          `<div class="pg-domain-sub">` +
+          `<span>Baseline: ${dp.baseline}%</span>` +
+          `<span>Target: ${dp.target}%</span>` +
+          `</div>` +
+          `</div>`;
+      }).join('');
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.pg-bar-anim').forEach(bar => {
+          bar.style.transition = 'width 1s cubic-bezier(0.4,0,0.2,1)';
+          bar.style.width = bar.dataset.w + '%';
+        });
+      });
+    }
+
+    /* ── Quiz history ────────────────────────────────────── */
+    const quizEl = document.getElementById('pg-quiz-list');
+    if (quizEl && d.quizHistory) {
+      quizEl.innerHTML = d.quizHistory.map(q => {
+        const scorePct = Math.round((q.score / q.total) * 100);
+        const grade    = scorePct >= 80 ? 'pass' : scorePct >= 60 ? 'warn' : 'fail';
+        const dateStr  = new Date(q.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `<div class="pg-quiz-row">` +
+          `<span class="pg-quiz-domain-chip">${q.domain}</span>` +
+          `<span class="pg-quiz-date">${dateStr}</span>` +
+          `<span class="pg-quiz-items">${q.total} items</span>` +
+          `<span class="pg-quiz-score ${grade}">${q.score}/${q.total}</span>` +
+          `</div>`;
+      }).join('');
+    }
+
+    /* ── Achievements ────────────────────────────────────── */
+    const achEl = document.getElementById('pg-ach-grid');
+    if (achEl && d.achievements) {
+      achEl.innerHTML = d.achievements.map(a =>
+        `<div class="pg-ach ${a.earned ? 'earned' : 'locked'}">` +
+        `<span class="pg-ach-icon">${a.icon}</span>` +
+        `<span class="pg-ach-label">${a.label}</span>` +
+        `</div>`
+      ).join('');
+    }
+
+  })();
+  </script>
+</body>
+</html>

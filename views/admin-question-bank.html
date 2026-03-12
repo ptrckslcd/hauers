@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Question Bank | Hauers Admin</title>
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <script src="/js/theme-toggle.js"></script>
+</head>
+<body data-role="admin">
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="app-shell">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="page-content">
+
+      <!-- ── Page header ── -->
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Question Bank</h1>
+          <p class="page-subtitle">Browse, search and manage all exam questions</p>
+        </div>
+      </header>
+
+      <!-- ── Stats row ── -->
+      <div class="dash-grid">
+
+        <div class="dash-card">
+          <span class="card-label">Total Questions</span>
+          <p class="card-sub">Questions in the library</p>
+          <div style="display:flex;align-items:baseline;gap:0.3rem;margin-top:0.5rem">
+            <span style="font-size:2.6rem;font-weight:800;color:var(--text-primary)" id="qb-total">—</span>
+            <span style="font-size:0.9rem;color:var(--text-subdued)">questions</span>
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <span class="card-label">By Domain</span>
+          <p class="card-sub">Questions per subject area</p>
+          <div id="qb-domain-breakdown" style="margin-top:0.5rem"></div>
+        </div>
+
+        <div class="dash-card">
+          <span class="card-label">By Difficulty</span>
+          <p class="card-sub">Questions per difficulty level</p>
+          <div id="qb-diff-breakdown" style="margin-top:0.5rem"></div>
+        </div>
+
+      </div>
+
+      <!-- ── Search bar ── -->
+      <div id="qb-search"></div>
+      <p class="sw-result-msg" id="qb-result-msg"></p>
+
+      <!-- ── Filter chips ── -->
+      <div class="rm-filter-bar" id="qb-filters">
+        <div class="rm-filter-row">
+          <span class="rm-filter-label">Domain</span>
+          <button class="rm-filter-chip active" data-filter="domain" data-val="all">All</button>
+          <button class="rm-filter-chip" data-filter="domain" data-val="Verbal Ability">Verbal</button>
+          <button class="rm-filter-chip" data-filter="domain" data-val="Numerical Ability">Numerical</button>
+          <button class="rm-filter-chip" data-filter="domain" data-val="Clerical Ability">Clerical</button>
+        </div>
+        <div class="rm-filter-row">
+          <span class="rm-filter-label">Difficulty</span>
+          <button class="rm-filter-chip active" data-filter="difficulty" data-val="all">All</button>
+          <button class="rm-filter-chip" data-filter="difficulty" data-val="Easy">Easy</button>
+          <button class="rm-filter-chip" data-filter="difficulty" data-val="Medium">Medium</button>
+          <button class="rm-filter-chip" data-filter="difficulty" data-val="Hard">Hard</button>
+        </div>
+      </div>
+
+      <!-- ── Question list ── -->
+      <div class="qb-list" id="qb-list"></div>
+
+    </main>
+  </div>
+
+  <script src="/js/search-widget.js"></script>
+  <script src="/js/app-shell.js"></script>
+  <script>
+  (async () => {
+
+    /* ── Fetch all questions ─────────────────────────────── */
+    let data;
+    try {
+      const r = await fetch('/admin/api/questions');
+      if (!r.ok) return;
+      data = await r.json();
+    } catch (_) { return; }
+
+    const allQuestions = data.questions || [];
+
+    /* ── Stats ───────────────────────────────────────────── */
+    const totalEl = document.getElementById('qb-total');
+    if (totalEl) totalEl.textContent = allQuestions.length;
+
+    const domainColors = {
+      'Verbal Ability':    '#818cf8',
+      'Numerical Ability': '#ff9933',
+      'Clerical Ability':  '#2dd4bf',
+    };
+    const breakdownEl = document.getElementById('qb-domain-breakdown');
+    if (breakdownEl) {
+      breakdownEl.innerHTML = Object.entries(domainColors).map(([d, col]) => {
+        const cnt  = allQuestions.filter(q => q.domain === d).length;
+        const name = d.replace(' Ability', '');
+        return `<div class="rm-stat-row">` +
+          `<span class="rm-stat-dot" style="background:${col}"></span>` +
+          `<span class="rm-stat-domain">${name}</span>` +
+          `<span class="rm-stat-count">${cnt}</span>` +
+          `</div>`;
+      }).join('');
+    }
+
+    const diffConfig = [
+      { label: 'Easy',   color: '#4ade80' },
+      { label: 'Medium', color: '#fb923c' },
+      { label: 'Hard',   color: '#f87171' },
+    ];
+    const diffEl = document.getElementById('qb-diff-breakdown');
+    if (diffEl) {
+      diffEl.innerHTML = diffConfig.map(d => {
+        const cnt = allQuestions.filter(q => q.difficulty === d.label).length;
+        return `<div class="rm-stat-row">` +
+          `<span class="rm-stat-dot" style="background:${d.color}"></span>` +
+          `<span class="rm-stat-domain">${d.label}</span>` +
+          `<span class="rm-stat-count">${cnt}</span>` +
+          `</div>`;
+      }).join('');
+    }
+
+    /* ── Helpers ─────────────────────────────────────────── */
+    function domainClass(d) {
+      if (d === 'Verbal Ability')    return 'verbal';
+      if (d === 'Numerical Ability') return 'numerical';
+      if (d === 'Clerical Ability')  return 'clerical';
+      return 'general';
+    }
+
+    /* ── Render questions ────────────────────────────────── */
+    const list      = document.getElementById('qb-list');
+    const resultMsg = document.getElementById('qb-result-msg');
+
+    function renderQuestions(qs) {
+      if (!list) return;
+      if (!qs.length) {
+        list.innerHTML = '<div class="rm-no-results"><span class="rm-no-icon">🔍</span>No questions match your search.</div>';
+        if (resultMsg) resultMsg.textContent = '';
+        return;
+      }
+      list.innerHTML = qs.map(q =>
+        `<a class="qb-row" href="/admin/question-bank/${q.id}">` +
+        `<div class="qb-meta">` +
+        `<span class="qb-num">#${q.id}</span>` +
+        `<span class="q-domain-badge ${domainClass(q.domain)}">${q.domain.replace(' Ability', '')}</span>` +
+        `<span class="q-difficulty${q.difficulty === 'Hard' ? ' hard' : ''}">${q.difficulty}</span>` +
+        `<span class="qb-view">View →</span>` +
+        `</div>` +
+        `<div class="qb-text">${q.question}</div>` +
+        `<div class="qb-answer">✓ ${q.answer}</div>` +
+        `</a>`
+      ).join('');
+      if (resultMsg) {
+        resultMsg.textContent = qs.length < allQuestions.length
+          ? 'Showing ' + qs.length + ' of ' + allQuestions.length + ' questions'
+          : '';
+      }
+    }
+
+    /* ── Active filter state ─────────────────────────────── */
+    let activeDomain = 'all';
+    let activeDiff   = 'all';
+    function applyFilters(qs) {
+      return qs.filter(q => {
+        const dm = activeDomain === 'all' || q.domain     === activeDomain;
+        const df = activeDiff   === 'all' || q.difficulty === activeDiff;
+        return dm && df;
+      });
+    }
+
+    /* ── Initial render ──────────────────────────────────── */
+    renderQuestions(allQuestions);
+
+    /* ── Search widget ───────────────────────────────────── */
+    const sw = new SearchWidget({
+      containerId:   'qb-search',
+      placeholder:   'Search questions by text, keyword or domain…',
+      apiUrl:        '/admin/api/search',
+      defaultParams: { scope: 'questions' },
+      onResults: results => renderQuestions(results),
+      onClear:   ()      => renderQuestions(applyFilters(allQuestions)),
+    });
+    sw.mount();
+
+    /* ── Filter chips ────────────────────────────────────── */
+    document.querySelectorAll('#qb-filters .rm-filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const filterKey = chip.dataset.filter;
+        const val       = chip.dataset.val;
+        document.querySelectorAll('#qb-filters .rm-filter-chip[data-filter="' + filterKey + '"]')
+          .forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        if (filterKey === 'domain')     activeDomain = val;
+        if (filterKey === 'difficulty') activeDiff   = val;
+        if (sw.getValue()) {
+          // Active search: pass updated filters to the server
+          sw.setParams({ domain: activeDomain, difficulty: activeDiff });
+        } else {
+          // No search query: filter client-side
+          renderQuestions(applyFilters(allQuestions));
+        }
+      });
+    });
+
+  })();
+  </script>
+</body>
+</html>

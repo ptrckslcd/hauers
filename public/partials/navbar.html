@@ -1,0 +1,54 @@
+<nav class="top-navbar">
+
+  <!-- Left: hamburger + divider + logo -->
+  <div class="nav-left">
+    <button class="nav-sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle sidebar" type="button">
+      <span class="toggle-bar"></span>
+      <span class="toggle-bar"></span>
+      <span class="toggle-bar"></span>
+    </button>
+    <span class="nav-divider" aria-hidden="true"></span>
+    <a href="/reviewee/dashboard" class="nav-logo-link" tabindex="-1" aria-hidden="true">
+      <img src="/assets/hauers-logo.svg" alt="Hauers" class="nav-logo-img">
+    </a>
+  </div>
+
+  <!-- Center: page title -->
+  <div class="nav-center">
+    <span class="nav-page-title" id="nav-page-title">Dashboard</span>
+  </div>
+
+  <!-- Right: theme toggle + divider + user info -->
+  <div class="nav-right">
+    <button id="theme-toggle-btn" class="nav-icon-btn" type="button" aria-label="Toggle theme">
+      <!-- Sun -->
+      <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4.5"/>
+        <line x1="12" y1="2" x2="12" y2="4.5"/>
+        <line x1="12" y1="19.5" x2="12" y2="22"/>
+        <line x1="4.93" y1="4.93" x2="6.7" y2="6.7"/>
+        <line x1="17.3" y1="17.3" x2="19.07" y2="19.07"/>
+        <line x1="2" y1="12" x2="4.5" y2="12"/>
+        <line x1="19.5" y1="12" x2="22" y2="12"/>
+        <line x1="4.93" y1="19.07" x2="6.7" y2="17.3"/>
+        <line x1="17.3" y1="6.7" x2="19.07" y2="4.93"/>
+      </svg>
+      <!-- Moon -->
+      <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+
+    <span class="nav-divider" aria-hidden="true"></span>
+
+    <!-- User profile -->
+    <div class="nav-user" id="nav-user">
+      <div class="nav-avatar" id="nav-avatar">D</div>
+      <div class="nav-user-info">
+        <span class="nav-user-name" id="nav-user-name">Demo User</span>
+        <span class="nav-user-email" id="nav-user-email">demo@hauers.com</span>
+      </div>
+    </div>
+  </div>
+
+</nav>

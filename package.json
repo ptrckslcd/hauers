@@ -1,0 +1,19 @@
+{
+  "name": "hauers",
+  "version": "1.0.0",
+  "description": "Adaptive CSE-PPT review platform UI simulation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "express-session": "^1.19.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

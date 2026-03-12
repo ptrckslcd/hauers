@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --bg-base: #ffffff;  --glass-bg: rgba(255, 255, 255, 0.7);
+  --card-bg: #f8f9fa;
+  --input-bg: #f3f4f6;
+  --border-default: #d1d5db;
+  --border-subdued: rgba(0, 0, 0, 0.15);
+  --text-main: #111827;
+  --text-subdued: #4b5563;
+
+  --fs-orange: #FF9933;
+  --fs-pink: #FF3366;
+  --fs-yellow: #FFD633;
+  
+  --brand-gradient: linear-gradient(90deg, var(--fs-yellow), var(--fs-orange), var(--fs-pink));
+  --fs-button-bg: #111827;
+  --fs-button-hover: #000000;
+  --fs-button-text: #ffffff;
+  /* Submit button hover — black thin border on yellow fill */
+  --submit-hover-border: #111827;
+  /* Google button — theme-aware base + fixed black border in light mode */
+  --google-btn-bg:     #ffffff;
+  --google-btn-color:  #111827;
+  --google-btn-border: #111827;
+  /* Silver leading edge — bright glint visible on the pale #d1d5db resting border */
+  --silver-start: rgba(160, 185, 240, 0.45);
+  --silver-peak:  rgba(225, 238, 255, 0.92);
+  /* Focus glow — tight ring + ambient haze; ring carries colour in light mode
+     where 2px of border alone is barely visible against a white background */
+  --focus-glow: 0 0 0 2px rgba(255, 130, 45, 0.55), 0 6px 28px rgba(255, 90, 30, 0.18);
+}
+
+[data-theme='dark'] {
+  --bg-base: #000000;  --glass-bg: rgba(10, 10, 10, 0.7);
+  --card-bg: #0A0A0A;
+  --input-bg: #121212;
+  --border-default: #2A2A2A;
+  --border-subdued: rgba(255, 255, 255, 0.08);
+  --text-main: #FFFFFF;
+  --text-subdued: #A1A1AA;
+  --fs-button-bg: #FFA000;
+  --fs-button-hover: #FFB300;
+  --fs-button-text: #000000;
+  /* Submit button hover — dark mode: no border needed against dark bg */
+  --submit-hover-border: transparent;
+  /* Google button — dark mode base */
+  --google-btn-bg:     #1c1c1e;
+  --google-btn-color:  #ffffff;
+  --google-btn-border: rgba(255, 255, 255, 0.10);
+  /* Silver leading edge — bright glint visible on the dark #2A2A2A resting border */
+  --silver-start: rgba(200, 220, 255, 0.50);
+  --silver-peak:  rgba(232, 245, 255, 0.96);
+  /* Focus glow — tighter ring + deeper ambient haze for dark backgrounds */
+  --focus-glow: 0 0 0 1px rgba(255, 130, 50, 0.50), 0 8px 36px rgba(255, 80, 40, 0.32);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+/* Ensure the HTML `hidden` attribute always wins over any display rule */
+[hidden] { display: none !important; }
+html {
+  overflow-x: hidden; /* clip horizontal scroll at viewport level — does NOT affect backdrop-filter on any child */
+  scroll-padding-top: 4rem; /* offset anchor jumps so sticky header never covers target sections */
+  scroll-behavior: smooth;
+}
+body {
+  background-color: var(--bg-base);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  /* overflow-x intentionally omitted here; each page adds it on its own wrapper
+     so that position:sticky + backdrop-filter can both work on the same page */
+}
+
+h1, h2, h3, h4, h5, h6 { font-family: 'Google Sans', sans-serif; }
+a { color: inherit; text-decoration: none; }
+
+
+/* Smooth theme transitions */
+body, .auth-column, .input-inner, input, .input-field, .brand-logos, button, a {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}

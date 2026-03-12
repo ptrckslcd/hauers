@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practice Quiz | Hauers</title>
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+  <script src="/js/theme-toggle.js"></script>
+</head>
+<body data-role="reviewee">
+
+  <!-- SVG gradient defs for results ring -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%"   stop-color="#FFD633"/>
+        <stop offset="50%"  stop-color="#FF9933"/>
+        <stop offset="100%" stop-color="#FF3366"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="app-shell">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="page-content">
+
+      <!-- ── Page header ── -->
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Practice Quiz</h1>
+          <p class="page-subtitle">Test your knowledge — instant feedback after each answer</p>
+        </div>
+      </header>
+
+      <!-- ── Phase 1: Setup ── -->
+      <div id="quiz-setup">
+        <div class="dash-card" style="max-width:600px">
+          <span class="card-label">Select Category</span>
+          <p class="card-sub">Focus on one domain or practice everything at once.</p>
+
+          <div class="quiz-cat-chips" id="quiz-cat-chips">
+            <button class="quiz-cat-chip active" data-cat="All" type="button">All Domains</button>
+            <button class="quiz-cat-chip" data-cat="Verbal Ability" type="button">Verbal Ability</button>
+            <button class="quiz-cat-chip" data-cat="Numerical Ability" type="button">Numerical Ability</button>
+            <button class="quiz-cat-chip" data-cat="Analytical Ability" type="button">Analytical Ability</button>
+            <button class="quiz-cat-chip" data-cat="Clerical Ability" type="button">Clerical Ability</button>
+            <button class="quiz-cat-chip" data-cat="General Information" type="button">General Info</button>
+          </div>
+
+          <div class="quiz-meta-row">
+            <span class="quiz-meta-item">
+              <span class="material-symbols-outlined" style="font-size:16px;line-height:1;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20">quiz</span>
+              <span id="quiz-count-label">15 questions</span>
+            </span>
+            <span class="quiz-meta-item">
+              <span class="material-symbols-outlined" style="font-size:16px;line-height:1;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20">bolt</span>
+              Instant feedback per answer
+            </span>
+          </div>
+
+          <button class="cta-pill" id="quiz-start-btn" type="button" style="align-self:flex-start;margin-top:0.25rem">
+            Start Quiz
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:0.5rem"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Phase 2: Question ── -->
+      <div id="quiz-question" hidden>
+        <div style="max-width:680px">
+
+          <div class="quiz-progress-wrap">
+            <div class="quiz-progress-track">
+              <div class="quiz-progress-fill" id="quiz-prog-fill"></div>
+            </div>
+            <span class="quiz-q-counter" id="quiz-q-counter">Q 1 of 15</span>
+          </div>
+
+          <div class="quiz-q-card">
+            <div class="quiz-q-meta">
+              <span class="quiz-domain-badge" id="quiz-domain-badge">Domain</span>
+              <span class="quiz-diff-badge diff-easy" id="quiz-diff-badge">Easy</span>
+            </div>
+            <p class="quiz-q-text" id="quiz-q-text"></p>
+            <div class="quiz-choices" id="quiz-choices"></div>
+            <div class="quiz-feedback" id="quiz-feedback" hidden></div>
+            <div class="quiz-next-wrap" id="quiz-next-wrap" hidden>
+              <button class="cta-pill" id="quiz-next-btn" type="button">Next Question →</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Phase 3: Results ── -->
+      <div id="quiz-results" hidden>
+        <div style="max-width:680px">
+          <div class="quiz-score-card">
+
+            <!-- Score ring + label -->
+            <div style="display:flex;align-items:center;gap:2rem;flex-wrap:wrap;margin-bottom:1.75rem">
+              <div class="dash-ring-wrap" style="width:120px;height:120px;flex-shrink:0">
+                <svg viewBox="0 0 130 130" class="ring-svg" style="width:100%;height:100%">
+                  <circle cx="65" cy="65" r="54" class="ring-track"/>
+                  <circle cx="65" cy="65" r="54" class="ring-prog" id="quiz-ring-prog"/>
+                </svg>
+                <div class="ring-center">
+                  <div class="ring-value-row">
+                    <span class="ring-pct" id="quiz-score-val">0</span>
+                    <span class="ring-unit">%</span>
+                  </div>
+                  <span class="ring-note">Score</span>
+                </div>
+              </div>
+              <div>
+                <p class="quiz-result-badge" id="quiz-result-badge"></p>
+                <p style="font-size:1.5rem;font-weight:700;color:var(--text-main);line-height:1.1;margin-top:0.25rem" id="quiz-score-frac">— / —</p>
+                <p style="font-size:0.82rem;color:var(--text-subdued);margin-top:0.3rem">questions answered correctly</p>
+              </div>
+            </div>
+
+            <!-- Domain breakdown -->
+            <span class="card-label" style="display:block;margin-bottom:0.85rem">Domain Breakdown</span>
+            <div id="quiz-breakdown"></div>
+
+            <!-- Review -->
+            <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border-subdued)">
+              <button class="quiz-review-toggle" id="quiz-review-toggle" type="button">Show Review</button>
+              <div id="quiz-review-list" class="quiz-review-list" hidden></div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap">
+              <button class="cta-pill" id="quiz-restart-btn" type="button">Try Again</button>
+              <a href="/reviewee/study-plan" class="cta-pill" style="background:var(--card-bg);color:var(--text-main);border-color:var(--border-subdued)">View Study Plan</a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/js/app-shell.js"></script>
+  <script>
+  (function () {
+    var allQuestions = [];
+    var filteredQs   = [];
+    var currentIdx   = 0;
+    var userAnswers  = [];
+    var selectedCat  = 'All';
+
+    /* ── Phase switch ── */
+    function show(phase) {
+      ['setup', 'question', 'results'].forEach(function (p) {
+        var el = document.getElementById('quiz-' + p);
+        if (el) el.hidden = (p !== phase);
+      });
+    }
+
+    /* ── Category chips ── */
+    document.getElementById('quiz-cat-chips').addEventListener('click', function (e) {
+      var chip = e.target.closest('.quiz-cat-chip');
+      if (!chip) return;
+      document.querySelectorAll('.quiz-cat-chip').forEach(function (c) { c.classList.remove('active'); });
+      chip.classList.add('active');
+      selectedCat = chip.dataset.cat;
+      updateCount();
+    });
+
+    function updateCount() {
+      var n = selectedCat === 'All'
+        ? allQuestions.length
+        : allQuestions.filter(function (q) { return q.domain === selectedCat; }).length;
+      var el = document.getElementById('quiz-count-label');
+      if (el) el.textContent = n + ' question' + (n !== 1 ? 's' : '');
+    }
+
+    /* ── Start ── */
+    document.getElementById('quiz-start-btn').addEventListener('click', function () {
+      filteredQs = selectedCat === 'All'
+        ? allQuestions.slice()
+        : allQuestions.filter(function (q) { return q.domain === selectedCat; });
+      if (!filteredQs.length) return;
+      currentIdx  = 0;
+      userAnswers = [];
+      show('question');
+      renderQ();
+    });
+
+    /* ── Render question ── */
+    function renderQ() {
+      var q     = filteredQs[currentIdx];
+      var total = filteredQs.length;
+      var num   = currentIdx + 1;
+
+      var fill = document.getElementById('quiz-prog-fill');
+      if (fill) fill.style.width = ((num - 1) / total * 100) + '%';
+
+      var counter = document.getElementById('quiz-q-counter');
+      if (counter) counter.textContent = 'Q ' + num + ' of ' + total;
+
+      var dbadge  = document.getElementById('quiz-domain-badge');
+      var difbadge = document.getElementById('quiz-diff-badge');
+      if (dbadge)   dbadge.textContent   = q.domain;
+      if (difbadge) {
+        difbadge.textContent = q.difficulty;
+        difbadge.className   = 'quiz-diff-badge diff-' + q.difficulty.toLowerCase();
+      }
+
+      var qText = document.getElementById('quiz-q-text');
+      if (qText) qText.textContent = q.question;
+
+      var choicesEl = document.getElementById('quiz-choices');
+      if (choicesEl) {
+        choicesEl.innerHTML = '';
+        var letters = ['A', 'B', 'C', 'D'];
+        q.choices.forEach(function (choice, i) {
+          var btn       = document.createElement('button');
+          btn.type      = 'button';
+          btn.className = 'quiz-choice';
+          btn.dataset.val = choice;
+          btn.innerHTML =
+            '<span class="quiz-choice-letter">' + letters[i] + '</span>' +
+            '<span class="quiz-choice-text">'   + choice     + '</span>';
+          btn.addEventListener('click', (function (c) {
+            return function () { handleAnswer(c, q); };
+          })(choice));
+          choicesEl.appendChild(btn);
+        });
+      }
+
+      var fb = document.getElementById('quiz-feedback');
+      var nw = document.getElementById('quiz-next-wrap');
+      if (fb) fb.hidden = true;
+      if (nw) nw.hidden = true;
+    }
+
+    /* ── Handle answer ── */
+    function handleAnswer(chosen, q) {
+      var isCorrect = chosen === q.answer;
+      userAnswers.push({ id: q.id, domain: q.domain, chosen: chosen, correct: q.answer, isCorrect: isCorrect });
+
+      document.querySelectorAll('.quiz-choice').forEach(function (btn) {
+        btn.disabled = true;
+        var v = btn.dataset.val;
+        if (v === q.answer)    btn.classList.add('correct');
+        else if (v === chosen) btn.classList.add('wrong');
+      });
+
+      var fb = document.getElementById('quiz-feedback');
+      if (fb) {
+        fb.textContent = isCorrect
+          ? '\u2713  Correct!'
+          : '\u2717  The correct answer is \u201c' + q.answer + '\u201d';
+        fb.className = 'quiz-feedback ' + (isCorrect ? 'quiz-feedback--correct' : 'quiz-feedback--wrong');
+        fb.hidden    = false;
+      }
+
+      var nw      = document.getElementById('quiz-next-wrap');
+      var nextBtn = document.getElementById('quiz-next-btn');
+      var isLast  = currentIdx === filteredQs.length - 1;
+      if (nextBtn) nextBtn.textContent = isLast ? 'See Results \u2192' : 'Next Question \u2192';
+      if (nw) nw.hidden = false;
+      if (nextBtn) {
+        nextBtn.onclick = function () {
+          if (isLast) { showResults(); }
+          else        { currentIdx++; renderQ(); }
+        };
+      }
+    }
+
+    /* ── Show results ── */
+    function showResults() {
+      show('results');
+
+      var total   = userAnswers.length;
+      var correct = userAnswers.filter(function (a) { return a.isCorrect; }).length;
+      var pct     = total ? Math.round(correct / total * 100) : 0;
+
+      var scoreVal  = document.getElementById('quiz-score-val');
+      var scoreFrac = document.getElementById('quiz-score-frac');
+      if (scoreVal)  scoreVal.textContent  = pct;
+      if (scoreFrac) scoreFrac.textContent = correct + ' / ' + total;
+
+      var ringEl = document.getElementById('quiz-ring-prog');
+      if (ringEl) {
+        var r = 54, circ = 2 * Math.PI * r;
+        ringEl.style.strokeDasharray  = circ;
+        ringEl.style.strokeDashoffset = circ;
+        setTimeout(function () {
+          ringEl.style.transition      = 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)';
+          ringEl.style.strokeDashoffset = circ * (1 - pct / 100);
+        }, 200);
+      }
+
+      var badge = document.getElementById('quiz-result-badge');
+      if (badge) {
+        if      (pct >= 80) { badge.textContent = 'Excellent! \uD83C\uDF89';                  badge.style.color = '#4ade80';          }
+        else if (pct >= 60) { badge.textContent = 'Good job! Keep it up.';           badge.style.color = 'var(--fs-orange)'; }
+        else                { badge.textContent = 'Keep practicing \u2014 you can do it!'; badge.style.color = 'var(--fs-pink)';   }
+      }
+
+      var domains   = [...new Set(userAnswers.map(function (a) { return a.domain; }))];
+      var brkdwnEl  = document.getElementById('quiz-breakdown');
+      if (brkdwnEl) {
+        brkdwnEl.innerHTML = '';
+        domains.forEach(function (domain) {
+          var da   = userAnswers.filter(function (a) { return a.domain === domain; });
+          if (!da.length) return;
+          var dc   = da.filter(function (a) { return a.isCorrect; }).length;
+          var dpct = Math.round(dc / da.length * 100);
+          var cls  = dpct >= 80 ? 'good' : dpct >= 60 ? 'warn' : 'bad';
+          brkdwnEl.innerHTML +=
+            '<div class="quiz-breakdown-row">' +
+            '<span class="quiz-breakdown-label">' + domain.replace(' Ability', '') + '</span>' +
+            '<div class="quiz-breakdown-bar-wrap"><div class="quiz-breakdown-bar" style="width:0%" data-pct="' + dpct + '"></div></div>' +
+            '<span class="quiz-breakdown-frac ' + cls + '">' + dc + '/' + da.length + '</span>' +
+            '</div>';
+        });
+        setTimeout(function () {
+          brkdwnEl.querySelectorAll('.quiz-breakdown-bar').forEach(function (b) {
+            b.style.transition = 'width 1s cubic-bezier(0.4,0,0.2,1)';
+            b.style.width      = b.dataset.pct + '%';
+          });
+        }, 300);
+      }
+
+      var reviewList = document.getElementById('quiz-review-list');
+      if (reviewList) {
+        reviewList.innerHTML = filteredQs.map(function (q, i) {
+          var ua  = userAnswers.find(function (a) { return a.id === q.id; });
+          if (!ua) return '';
+          var cls  = ua.isCorrect ? 'correct' : 'wrong';
+          var icon = ua.isCorrect ? '&#10003;' : '&#10007;';
+          return (
+            '<div class="quiz-review-item ' + cls + '">' +
+            '<span class="quiz-review-icon">' + icon + '</span>' +
+            '<div class="quiz-review-body">' +
+            '<p class="quiz-review-q">' + (i + 1) + '. ' + q.question + '</p>' +
+            (!ua.isCorrect
+              ? '<p class="quiz-review-answer">Your answer: <em>' + ua.chosen + '</em> \u2014 Correct: <strong>' + q.answer + '</strong></p>'
+              : '') +
+            '</div></div>'
+          );
+        }).join('');
+      }
+
+      var revToggle = document.getElementById('quiz-review-toggle');
+      var revList   = document.getElementById('quiz-review-list');
+      if (revToggle) {
+        revToggle.onclick = function () {
+          revList.hidden        = !revList.hidden;
+          revToggle.textContent = revList.hidden ? 'Show Review' : 'Hide Review';
+        };
+      }
+
+      var restartBtn = document.getElementById('quiz-restart-btn');
+      if (restartBtn) {
+        restartBtn.onclick = function () { show('setup'); };
+      }
+    }
+
+    /* ── Load questions ── */
+    (async function init() {
+      try {
+        var r = await fetch('/reviewee/api/quiz');
+        if (!r.ok) return;
+        var data = await r.json();
+        allQuestions = data.questions || [];
+        updateCount();
+      } catch (_) {}
+    })();
+
+  })();
+  </script>
+
+</body>
+</html>

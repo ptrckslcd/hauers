@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Hauers</title>
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <script src="/js/theme-toggle.js"></script>
+</head>
+<body data-role="admin">
+
+  <!-- Gradient defs for bar fills -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%"   stop-color="#FFD633"/>
+        <stop offset="50%"  stop-color="#FF9933"/>
+        <stop offset="100%" stop-color="#FF3366"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="app-shell sidebar-collapsed">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="page-content">
+
+      <!-- ── Page Header ──────────────────────────────── -->
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Admin Dashboard</h1>
+          <p class="page-subtitle">
+            <span class="badge">Admin</span>
+            Platform overview &nbsp;·&nbsp; March 2026
+          </p>
+        </div>
+        <a href="/admin/analytics" class="cta-pill">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.45rem;flex-shrink:0">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6"  y1="20" x2="6"  y2="14"/>
+          </svg>
+          View Analytics
+        </a>
+      </header>
+
+      <!-- ── Row 1: 4 KPI Tiles ───────────────────────── -->
+      <div class="dash-grid dash-grid--4col">
+
+        <!-- Total Users -->
+        <div class="dash-card admin-kpi-card">
+          <div class="admin-kpi-header">
+            <span class="card-label">Total Users</span>
+            <span class="admin-kpi-icon admin-kpi-icon--blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </span>
+          </div>
+          <span class="admin-kpi-val" id="stat-total-users">—</span>
+          <span class="card-sub">registered accounts</span>
+          <span class="admin-kpi-delta admin-kpi-delta--up">+14 this week</span>
+        </div>
+
+        <!-- Active Reviewees -->
+        <div class="dash-card admin-kpi-card">
+          <div class="admin-kpi-header">
+            <span class="card-label">Active Reviewees</span>
+            <span class="admin-kpi-icon admin-kpi-icon--green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+          </div>
+          <span class="admin-kpi-val" id="stat-active-reviewees">—</span>
+          <span class="card-sub">active this week</span>
+          <span class="admin-kpi-delta admin-kpi-delta--up">69% of total users</span>
+        </div>
+
+        <!-- Avg Readiness -->
+        <div class="dash-card admin-kpi-card">
+          <div class="admin-kpi-header">
+            <span class="card-label">Avg. Readiness</span>
+            <span class="admin-kpi-icon admin-kpi-icon--orange">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </span>
+          </div>
+          <span class="admin-kpi-val" id="stat-avg-readiness">—</span>
+          <span class="card-sub">platform score</span>
+          <span class="admin-kpi-delta admin-kpi-delta--warn">12 pts below pass mark</span>
+        </div>
+
+        <!-- New Signups -->
+        <div class="dash-card admin-kpi-card">
+          <div class="admin-kpi-header">
+            <span class="card-label">New This Week</span>
+            <span class="admin-kpi-icon admin-kpi-icon--pink">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+                <line x1="19" y1="8" x2="19" y2="14"/>
+                <line x1="22" y1="11" x2="16" y2="11"/>
+              </svg>
+            </span>
+          </div>
+          <span class="admin-kpi-val" id="stat-new-signups">—</span>
+          <span class="card-sub">recent signups</span>
+          <span class="admin-kpi-delta admin-kpi-delta--up">past 7 days</span>
+        </div>
+
+      </div>
+
+      <!-- ── Row 2: Domain Performance · Platform Overview ── -->
+      <div class="dash-grid dash-grid--split21">
+
+        <!-- Domain Performance -->
+        <div class="dash-card">
+          <span class="card-label">Avg. Domain Performance</span>
+          <p class="card-sub">Platform-wide average score per CSE domain &nbsp;·&nbsp; pass mark: 80</p>
+          <div class="msc-bars" id="domain-bars" style="margin-top:0.65rem;flex:1"></div>
+          <p class="card-footnote">
+            2 domains are significantly below the 65% threshold — targeted intervention recommended.
+          </p>
+        </div>
+
+        <!-- Platform Overview -->
+        <div class="dash-card">
+          <span class="card-label">Users by Exam Level</span>
+          <div id="level-split" style="margin-top:0.5rem"></div>
+
+          <span class="card-label" style="margin-top:1.1rem">Pass Rate</span>
+          <p class="card-sub" style="margin-top:0.1rem">Reviewees who reached ≥80% readiness</p>
+          <div style="margin:0.45rem 0 0.35rem">
+            <div class="msc-bar-label">
+              <span>Achieved 80%+</span>
+              <span class="mbar-val" id="pass-rate-val">—</span>
+            </div>
+            <div class="msc-bar-track" style="height:7px">
+              <div class="msc-bar-fill" id="pass-rate-fill" style="width:0%;transition:width 1.1s cubic-bezier(0.4,0,0.2,1)"></div>
+            </div>
+          </div>
+
+          <span class="card-label" style="margin-top:1.1rem">Common Weak Areas</span>
+          <div class="weak-tags" id="admin-weak-domains" style="margin-top:0.45rem">
+            <span class="weak-tag">—</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Row 3: Recent Activity · Quick Actions ──────── -->
+      <div class="dash-grid dash-grid--split21">
+
+        <!-- Recent Activity -->
+        <div class="dash-card">
+          <span class="card-label">Recent Activity</span>
+          <p class="card-sub">Latest platform events</p>
+          <div id="activity-feed" class="activity-feed" style="margin-top:0.65rem"></div>
+          <a href="/admin/users" class="card-link" style="margin-top:0.75rem">View all users →</a>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dash-card">
+          <span class="card-label">Quick Actions</span>
+          <div class="quick-actions" style="flex:1;margin-top:0.35rem">
+
+            <a href="/admin/users" class="qa-btn">
+              <span class="qa-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </span>
+              <span class="qa-label">Manage Users</span>
+              <svg class="qa-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
+
+            <a href="/admin/question-bank" class="qa-btn">
+              <span class="qa-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5"/>
+                </svg>
+              </span>
+              <span class="qa-label">Question Bank</span>
+              <svg class="qa-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
+
+            <a href="/admin/analytics" class="qa-btn">
+              <span class="qa-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10"/>
+                  <line x1="12" y1="20" x2="12" y2="4"/>
+                  <line x1="6"  y1="20" x2="6"  y2="14"/>
+                </svg>
+              </span>
+              <span class="qa-label">Analytics</span>
+              <svg class="qa-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── CTA Banner ──────────────────────────────────── -->
+      <div class="dash-cta">
+        <div class="dash-cta-text">
+          <h3>Ready for deeper insights?</h3>
+          <p>Explore domain trends, question performance, and individual reviewee progress in the full analytics suite.</p>
+        </div>
+        <a href="/admin/analytics" class="cta-pill">Open Analytics</a>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/js/admin-shell.js"></script>
+</body>
+</html>

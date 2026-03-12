@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get Started | Hauers</title>
+
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+
+  <script src="/js/theme-toggle.js"></script>
+</head>
+<body>
+
+  <!-- Gradient SVG defs (for icon fills) -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="fs-gradient" x1="100%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%"   stop-color="#FF3366"/>
+        <stop offset="50%"  stop-color="#FF9933"/>
+        <stop offset="100%" stop-color="#FFD633"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="ambient-glow"></div>
+
+  <!-- Theme toggle -->
+  <button id="theme-toggle-btn" class="auth-theme-toggle" aria-label="Toggle theme">
+    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  </button>
+
+  <main class="auth-main">
+    <div class="auth-column" style="max-width: 460px;">
+
+      <!-- Branding -->
+      <div class="greeting-area">
+        <div class="brand-logos">
+          <img src="/assets/hauers-logo.svg" alt="Hauers" style="height: 28px;">
+          <span class="brand-x">×</span>
+          <img src="/assets/access-logo.svg" alt="ACCESS" style="height: 28px;">
+        </div>
+        <h1 class="greeting">Let's set you up</h1>
+        <p class="greeting-sub">A few quick questions to personalise your review plan.</p>
+      </div>
+
+      <!-- Step indicator -->
+      <div class="ob-steps" id="ob-steps">
+        <div class="ob-step active" data-step="1">
+          <div class="ob-step-dot">1</div>
+          <span class="ob-step-label">Level</span>
+        </div>
+        <div class="ob-step-line" id="line-1-2"></div>
+        <div class="ob-step" data-step="2">
+          <div class="ob-step-dot">2</div>
+          <span class="ob-step-label">Schedule</span>
+        </div>
+        <div class="ob-step-line" id="line-2-3"></div>
+        <div class="ob-step" data-step="3">
+          <div class="ob-step-dot">3</div>
+          <span class="ob-step-label">Preferences</span>
+        </div>
+      </div>
+
+      <!-- Wizard form -->
+      <form id="ob-form" action="/reviewee/dashboard" method="GET" novalidate>
+
+        <!-- ── Step 1: CSE Level ─────────────────────────── -->
+        <div class="ob-panel" data-panel="1">
+          <p class="ob-question">What exam level are you preparing for?</p>
+          <div class="ob-level-grid">
+            <label class="ob-level-card">
+              <input type="radio" name="examLevel" value="Professional">
+              <div class="ob-level-inner">
+                <span class="ob-level-title">Professional</span>
+                <span class="ob-level-desc">Civil Service Exam — Professional level</span>
+              </div>
+            </label>
+            <label class="ob-level-card">
+              <input type="radio" name="examLevel" value="Sub-Professional">
+              <div class="ob-level-inner">
+                <span class="ob-level-title">Sub-Professional</span>
+                <span class="ob-level-desc">Civil Service Exam — Sub-Professional level</span>
+              </div>
+            </label>
+            <label class="ob-level-card ob-level-card--full">
+              <input type="radio" name="examLevel" value="Both">
+              <div class="ob-level-inner">
+                <span class="ob-level-title">Both levels</span>
+                <span class="ob-level-desc">I'm preparing for both or am not sure yet</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- ── Step 2: Schedule ──────────────────────────── -->
+        <div class="ob-panel hidden" data-panel="2">
+          <p class="ob-question">When are you aiming to take the exam?</p>
+          <div class="input-field">
+            <div class="input-inner">
+              <div class="input-stack">
+                <svg class="input-icon" viewBox="0 0 24 24">
+                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5C3.89 3 3.01 3.9 3.01 5L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                </svg>
+                <input type="date" name="targetExamDate" id="targetExamDate" placeholder="Target exam date">
+              </div>
+            </div>
+          </div>
+
+          <p class="ob-question" style="margin-top: 1.25rem;">How many hours can you study per week?</p>
+          <div class="ob-hours-row">
+            <input type="range" name="weeklyHours" id="weeklyHours" class="ob-slider" min="1" max="40" value="10">
+            <span class="ob-hours-val"><span id="hours-display">10</span> h/week</span>
+          </div>
+        </div>
+
+        <!-- ── Step 3: Preferences ───────────────────────── -->
+        <div class="ob-panel hidden" data-panel="3">
+          <p class="ob-question">Which days do you prefer to study?</p>
+          <div class="ob-day-chips">
+            <label class="ob-day-chip"><input type="checkbox" name="studyDays" value="Mon"><span>Mon</span></label>
+            <label class="ob-day-chip"><input type="checkbox" name="studyDays" value="Tue"><span>Tue</span></label>
+            <label class="ob-day-chip"><input type="checkbox" name="studyDays" value="Wed"><span>Wed</span></label>
+            <label class="ob-day-chip"><input type="checkbox" name="studyDays" value="Thu"><span>Thu</span></label>
+            <label class="ob-day-chip"><input type="checkbox" name="studyDays" value="Fri"><span>Fri</span></label>
+            <label class="ob-day-chip"><input type="checkbox" name="studyDays" value="Sat"><span>Sat</span></label>
+            <label class="ob-day-chip"><input type="checkbox" name="studyDays" value="Sun"><span>Sun</span></label>
+          </div>
+
+          <p class="ob-question" style="margin-top: 1.5rem;">What time of day do you prefer to study?</p>
+          <div class="ob-time-opts">
+            <label class="ob-time-card">
+              <input type="radio" name="studyTime" value="morning">
+              <div class="ob-time-inner">🌅<br>Morning</div>
+            </label>
+            <label class="ob-time-card">
+              <input type="radio" name="studyTime" value="afternoon">
+              <div class="ob-time-inner">☀️<br>Afternoon</div>
+            </label>
+            <label class="ob-time-card">
+              <input type="radio" name="studyTime" value="evening">
+              <div class="ob-time-inner">🌙<br>Evening</div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="ob-nav">
+          <button type="button" id="ob-back" class="ob-back-btn hidden">Back</button>
+          <button type="button" id="ob-next" class="submit-btn" style="flex: 1;">Continue</button>
+        </div>
+
+      </form>
+
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      let step = 1;
+      const TOTAL = 3;
+
+      const panels   = document.querySelectorAll('.ob-panel');
+      const stepDots = document.querySelectorAll('.ob-step');
+      const nextBtn  = document.getElementById('ob-next');
+      const backBtn  = document.getElementById('ob-back');
+      const line12   = document.getElementById('line-1-2');
+      const line23   = document.getElementById('line-2-3');
+
+      // Sync slider display
+      const slider  = document.getElementById('weeklyHours');
+      const display = document.getElementById('hours-display');
+      if (slider) {
+        slider.addEventListener('input', () => { display.textContent = slider.value; });
+      }
+
+      function updateUI(n) {
+        panels.forEach(p => p.classList.toggle('hidden', +p.dataset.panel !== n));
+        stepDots.forEach(s => {
+          const sn = +s.dataset.step;
+          s.classList.toggle('active', sn === n);
+          s.classList.toggle('done',   sn < n);
+        });
+        if (line12) line12.classList.toggle('done', n > 1);
+        if (line23) line23.classList.toggle('done', n > 2);
+        backBtn.classList.toggle('hidden', n === 1);
+        nextBtn.textContent = n === TOTAL ? "Let's go!" : 'Continue';
+      }
+
+      function validate(n) {
+        if (n === 1) return !!document.querySelector('input[name="examLevel"]:checked');
+        if (n === 2) return !!document.getElementById('targetExamDate').value;
+        return true; // step 3 is optional
+      }
+
+      function shake(n) {
+        const panel = document.querySelector(`.ob-panel[data-panel="${n}"]`);
+        if (!panel) return;
+        panel.classList.remove('shake');
+        void panel.offsetWidth; // reflow
+        panel.classList.add('shake');
+        panel.addEventListener('animationend', () => panel.classList.remove('shake'), { once: true });
+      }
+
+      nextBtn.addEventListener('click', () => {
+        if (!validate(step)) { shake(step); return; }
+        if (step < TOTAL) {
+          step++;
+          updateUI(step);
+        } else {
+          // Save selections to sessionStorage before redirecting
+          const data = {
+            examLevel:      (document.querySelector('input[name="examLevel"]:checked') || {}).value,
+            targetExamDate: (document.getElementById('targetExamDate') || {}).value,
+            weeklyHours:    slider ? slider.value : 10,
+            studyDays:      [...document.querySelectorAll('input[name="studyDays"]:checked')].map(i => i.value),
+            studyTime:      (document.querySelector('input[name="studyTime"]:checked') || {}).value,
+          };
+          try { sessionStorage.setItem('hauers_onboarding', JSON.stringify(data)); } catch(_) {}
+          window.location.href = '/reviewee/dashboard';
+        }
+      });
+
+      backBtn.addEventListener('click', () => {
+        if (step > 1) { step--; updateUI(step); }
+      });
+
+      updateUI(1);
+    })();
+  </script>
+
+</body>
+</html>
