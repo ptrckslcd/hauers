@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Detail | Hauers Admin</title>
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <script src="/js/theme-toggle.js"></script>
+</head>
+<body data-role="admin">
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="app-shell sidebar-collapsed">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="page-content">
+
+      <!-- ── Back link ── -->
+      <a href="/admin/users" class="qd-back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Back to Users
+      </a>
+
+      <!-- ── Hero card ── -->
+      <div class="dash-card" style="margin-bottom:1.25rem">
+
+        <div class="ud-hero">
+          <div class="ud-avatar" id="ud-avatar">?</div>
+          <div>
+            <div class="ud-name"  id="ud-full-name">Loading…</div>
+            <div class="ud-email" id="ud-email"></div>
+            <div class="ud-chips" id="ud-chips"></div>
+          </div>
+        </div>
+
+        <div class="ud-field-grid">
+          <div class="ud-field">
+            <span class="ud-field-label">Joined</span>
+            <span class="ud-field-value" id="ud-joined">—</span>
+          </div>
+          <div class="ud-field">
+            <span class="ud-field-label">Last Active</span>
+            <span class="ud-field-value" id="ud-last-active">—</span>
+          </div>
+          <div class="ud-field">
+            <span class="ud-field-label">Exam Level</span>
+            <span class="ud-field-value" id="ud-level">—</span>
+          </div>
+          <div class="ud-field">
+            <span class="ud-field-label">Study Streak</span>
+            <span class="ud-field-value" id="ud-streak">—</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Readiness + Diagnostic grid ── -->
+      <div class="dash-grid dash-grid--split21">
+
+        <!-- Domain scores card -->
+        <div class="dash-card">
+          <span class="card-label">Domain Scores</span>
+          <p class="card-sub">Latest diagnostic performance by subject area</p>
+          <div id="ud-domain-bars" style="margin-top:1rem">
+            <div style="color:var(--text-subdued);font-size:0.85rem;padding:1.5rem 0">No diagnostic data available.</div>
+          </div>
+        </div>
+
+        <!-- Readiness card -->
+        <div class="dash-card" style="align-items:center;text-align:center">
+          <span class="card-label">Readiness Score</span>
+          <p class="card-sub">Overall preparedness</p>
+
+          <!-- Readiness ring -->
+          <div style="position:relative;display:inline-flex;align-items:center;justify-content:center;margin:1.25rem auto">
+            <svg width="120" height="120" viewBox="0 0 120 120" style="transform:rotate(-90deg)">
+              <defs>
+                <linearGradient id="udRingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%"   stop-color="#FFD633"/>
+                  <stop offset="50%"  stop-color="#FF9933"/>
+                  <stop offset="100%" stop-color="#FF3366"/>
+                </linearGradient>
+              </defs>
+              <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border-subdued)" stroke-width="10"/>
+              <circle id="ud-ring-fill" cx="60" cy="60" r="50" fill="none"
+                stroke="url(#udRingGrad)" stroke-width="10"
+                stroke-linecap="round"
+                stroke-dasharray="314.16"
+                stroke-dashoffset="314.16"
+                style="transition:stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)"/>
+            </svg>
+            <div style="position:absolute;text-align:center">
+              <div id="ud-readiness-val" style="font-size:1.7rem;font-weight:800;color:var(--text-main)">—</div>
+              <div style="font-size:0.7rem;color:var(--text-subdued);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Score</div>
+            </div>
+          </div>
+
+          <!-- Diagnostic snapshot -->
+          <div id="ud-diag-info" style="margin-top:0.5rem;font-size:0.82rem;color:var(--text-subdued)">—</div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/js/admin-shell.js"></script>
+  <script>
+  (async () => {
+
+    /* ── Get user ID from URL ────────────────────────────── */
+    const userId = parseInt(window.location.pathname.split('/').pop(), 10);
+    if (!userId) return;
+
+    /* ── Fetch user ──────────────────────────────────────── */
+    let user;
+    try {
+      const r = await fetch('/admin/api/users/' + userId);
+      if (!r.ok) {
+        document.getElementById('ud-full-name').textContent = 'User not found';
+        return;
+      }
+      user = await r.json();
+    } catch (_) { return; }
+
+    /* ── Helpers ─────────────────────────────────────────── */
+    function fmtDate(d) {
+      return d ? new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '—';
+    }
+
+    /* ── Populate hero ───────────────────────────────────── */
+    const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+
+    const avatarEl = document.getElementById('ud-avatar');
+    if (avatarEl) avatarEl.textContent = initials;
+
+    const nameEl = document.getElementById('ud-full-name');
+    if (nameEl) nameEl.textContent = user.firstName + ' ' + user.lastName;
+
+    const emailEl = document.getElementById('ud-email');
+    if (emailEl) emailEl.textContent = user.email;
+
+    const chipsEl = document.getElementById('ud-chips');
+    if (chipsEl) {
+      const levelChip  = `<span class="q-domain-badge general">${user.examLevel || 'No level'}</span>`;
+      const statusChip = user.isVerified
+        ? `<span class="status-badge status-badge--verified">Verified</span>`
+        : `<span class="status-badge status-badge--pending">Pending Verification</span>`;
+      chipsEl.innerHTML = levelChip + statusChip;
+    }
+
+    /* ── Profile fields ──────────────────────────────────── */
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    setVal('ud-joined',      fmtDate(user.joinedAt));
+    setVal('ud-last-active', fmtDate(user.lastActive));
+    setVal('ud-level',       user.examLevel || '—');
+    setVal('ud-streak',      user.streak ? user.streak + (user.streak === 1 ? ' day' : ' days') : '0 days');
+
+    /* ── Readiness ring ──────────────────────────────────── */
+    const score = user.readinessScore;
+    setVal('ud-readiness-val', score != null ? score + '%' : '—');
+    if (score != null) {
+      const circumference = 314.16;
+      const offset = circumference - (score / 100) * circumference;
+      setTimeout(() => {
+        const ring = document.getElementById('ud-ring-fill');
+        if (ring) ring.style.strokeDashoffset = offset;
+      }, 400);
+    }
+
+    /* ── Diagnostic info ─────────────────────────────────── */
+    const diagInfoEl = document.getElementById('ud-diag-info');
+    if (diagInfoEl) {
+      if (user.diagnostic) {
+        diagInfoEl.textContent = 'Latest diagnostic score: ' + user.diagnostic.latestScore + '%';
+      } else {
+        diagInfoEl.textContent = 'No diagnostic taken yet.';
+      }
+    }
+
+    /* ── Domain score bars ───────────────────────────────── */
+    const domainContainer = document.getElementById('ud-domain-bars');
+    if (domainContainer && user.diagnostic && user.diagnostic.domainScores) {
+      const domainColors = {
+        'Verbal Ability':      '#818cf8',
+        'Numerical Ability':   '#ff9933',
+        'Analytical Ability':  '#2dd4bf',
+        'Clerical Ability':    '#ff3366',
+        'General Information': '#a78bfa',
+      };
+
+      domainContainer.innerHTML = user.diagnostic.domainScores.map(({ domain, score: s }) => {
+        const color   = domainColors[domain] || '#818cf8';
+        const valCls  = s >= 70 ? ' good' : s < 60 ? ' warn' : '';
+        return `
+          <div class="msc-bar-item">
+            <div class="msc-bar-label">
+              <span>${domain}</span>
+              <span class="mbar-val${valCls}">${s}%</span>
+            </div>
+            <div class="msc-bar-track">
+              <div class="msc-bar-fill" data-bw="${s}"
+                style="width:0%;background:${color};transition:width 1.1s cubic-bezier(0.4,0,0.2,1)"></div>
+            </div>
+          </div>`;
+      }).join('');
+
+      setTimeout(() => {
+        domainContainer.querySelectorAll('.msc-bar-fill[data-bw]').forEach(bar => {
+          bar.style.width = bar.dataset.bw + '%';
+        });
+      }, 400);
+    }
+
+  })();
+  </script>
+
+</body>
+</html>

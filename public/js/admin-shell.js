@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const link = document.createElement('link');
     link.id   = 'mat-symbols-css';
     link.rel  = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block';
     document.head.appendChild(link);
   }
 
@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* ── 5. Sidebar collapse / expand ──────────────────────── */
   const sidebar    = document.getElementById('app-sidebar');
-  const toggleBtn  = document.getElementById('sidebar-toggle-btn');
   const shell      = document.querySelector('.app-shell');
 
   const COLLAPSED_KEY = 'hauers_admin_sidebar_collapsed';
@@ -64,21 +63,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     sidebar.classList.toggle('collapsed', collapsed);
     shell.classList.toggle('sidebar-collapsed', collapsed);
     document.body.classList.toggle('sidebar-collapsed', collapsed);
-    const handle = document.getElementById('sidebar-collapse-handle');
-    if (handle) {
-      const poly = handle.querySelector('polyline');
-      if (poly) poly.setAttribute('points', collapsed ? '9 18 15 12 9 6' : '15 18 9 12 15 6');
-    }
   }
 
   applyCollapsedState(false);
-
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      localStorage.setItem(COLLAPSED_KEY, isCollapsed() ? '0' : '1');
-      applyCollapsedState(true);
-    });
-  }
 
   const collapseHandle = document.getElementById('sidebar-collapse-handle');
   if (collapseHandle) {
@@ -116,8 +103,131 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (avatarEl)    avatarEl.textContent    = u.firstName[0].toUpperCase();
       if (userNameEl)  userNameEl.textContent  = `${u.firstName} ${u.lastName}`;
       if (userEmailEl) userEmailEl.textContent = u.email;
+
+      /* Sync profile popup fields */
+      const nppAvatar = document.getElementById('npp-avatar');
+      const nppName   = document.getElementById('npp-name');
+      const nppEmail  = document.getElementById('npp-email');
+      const nppRole   = document.getElementById('npp-role');
+      if (nppAvatar) nppAvatar.textContent = u.firstName[0].toUpperCase();
+      if (nppName)   nppName.textContent   = `${u.firstName} ${u.lastName}`;
+      if (nppEmail)  nppEmail.textContent  = u.email;
+      if (nppRole)   nppRole.textContent   = 'Administrator';
     }
   } catch (_) {}
+
+  /* Profile popup links for admin */
+  const nppEditLink     = document.getElementById('npp-edit-link');
+  const nppSettingsLink = document.getElementById('npp-settings-link');
+  if (nppEditLink) nppEditLink.style.display = 'none';
+  if (nppSettingsLink) {
+    nppSettingsLink.href = '/admin/settings';
+    nppSettingsLink.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Account Settings';
+  }
+
+  /* Nav-user click → toggle profile popup */
+  const navUserEl    = document.getElementById('nav-user');
+  const profilePopup = document.getElementById('nav-profile-popup');
+  if (navUserEl && profilePopup) {
+    navUserEl.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = !profilePopup.hidden;
+      profilePopup.hidden = isOpen;
+      navUserEl.setAttribute('aria-expanded', String(!isOpen));
+      const notifPanel = document.getElementById('nav-notif-panel');
+      if (notifPanel) notifPanel.hidden = true;
+    });
+    navUserEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navUserEl.click(); }
+      if (e.key === 'Escape') { profilePopup.hidden = true; navUserEl.setAttribute('aria-expanded', 'false'); }
+    });
+  }
+
+  /* ── Notification bell ──────────────────────────────── */
+  const ADMIN_NOTIF_KEY = 'hauers_admin_notifs_read';
+  const adminNotifs = [
+    { id: 1, icon: '👤', text: '3 new users registered today.',                   time: '1 hour ago'  },
+    { id: 2, icon: '📝', text: 'Question bank now has 15+ questions.',             time: '5 hours ago' },
+    { id: 3, icon: '📊', text: 'Weekly analytics report is ready to view.',       time: '1 day ago'   },
+  ];
+
+  function initAdminNotifications(notifs, storageKey) {
+    const badge      = document.getElementById('nav-notif-badge');
+    const listEl     = document.getElementById('nav-notif-list');
+    const notifBtn   = document.getElementById('nav-notif-btn');
+    const notifPanel = document.getElementById('nav-notif-panel');
+    const clearBtn   = document.getElementById('nav-notif-clear');
+
+    function renderBadge() {
+      const read = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const u = notifs.filter(n => !read.includes(n.id));
+      if (badge) { badge.textContent = u.length; badge.hidden = u.length === 0; }
+    }
+
+    function renderList() {
+      if (!listEl) return;
+      const read = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      if (!notifs.length) {
+        listEl.innerHTML = '<div class="nav-notif-empty">No notifications</div>';
+        return;
+      }
+      listEl.innerHTML = notifs.map(n => {
+        const isRead = read.includes(n.id);
+        return `<div class="nav-notif-item${isRead ? ' read' : ''}" data-id="${n.id}">
+          <span class="nav-notif-icon">${n.icon}</span>
+          <div class="nav-notif-body">
+            <p class="nav-notif-text">${n.text}</p>
+            <span class="nav-notif-time">${n.time}</span>
+          </div>
+          ${isRead ? '' : '<span class="nav-notif-dot"></span>'}
+        </div>`;
+      }).join('');
+      listEl.querySelectorAll('.nav-notif-item:not(.read)').forEach(item => {
+        item.addEventListener('click', () => {
+          const id = Number(item.dataset.id);
+          const r  = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          if (!r.includes(id)) { r.push(id); localStorage.setItem(storageKey, JSON.stringify(r)); }
+          renderBadge(); renderList();
+        });
+      });
+    }
+
+    renderBadge();
+    renderList();
+
+    if (notifBtn && notifPanel) {
+      notifBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = !notifPanel.hidden;
+        notifPanel.hidden = isOpen;
+        if (profilePopup) { profilePopup.hidden = true; if (navUserEl) navUserEl.setAttribute('aria-expanded', 'false'); }
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        localStorage.setItem(storageKey, JSON.stringify(notifs.map(n => n.id)));
+        renderBadge(); renderList();
+      });
+    }
+  }
+
+  initAdminNotifications(adminNotifs, ADMIN_NOTIF_KEY);
+
+  /* Close popups when clicking outside */
+  document.addEventListener('click', () => {
+    if (profilePopup) { profilePopup.hidden = true; if (navUserEl) navUserEl.setAttribute('aria-expanded', 'false'); }
+    const notifPanel = document.getElementById('nav-notif-panel');
+    if (notifPanel) notifPanel.hidden = true;
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (profilePopup) { profilePopup.hidden = true; if (navUserEl) navUserEl.setAttribute('aria-expanded', 'false'); }
+      const notifPanel = document.getElementById('nav-notif-panel');
+      if (notifPanel) notifPanel.hidden = true;
+    }
+  });
 
   /* ── 7. Dashboard data population ─────────────────────── */
   if (currentPath !== '/admin/dashboard') return;

@@ -66,6 +66,25 @@
   margin-top: 0.5rem;
 }
 
+/* Logo link in auth pages — navigates to landing but shows no visual effects */
+.auth-logo-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  outline: none;
+  border: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.auth-logo-link:hover,
+.auth-logo-link:focus,
+.auth-logo-link:active {
+  text-decoration: none;
+  outline: none;
+  box-shadow: none;
+  opacity: 1;
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;

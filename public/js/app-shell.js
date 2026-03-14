@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const _msLink = document.createElement('link');
     _msLink.id   = 'mat-symbols-css';
     _msLink.rel  = 'stylesheet';
-    _msLink.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap';
+    _msLink.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block';
     document.head.appendChild(_msLink);
   }
 
@@ -67,7 +67,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* ── 5. Sidebar collapse / expand ────────────────────── */
   const sidebar = document.getElementById('app-sidebar');
-  const toggleBtn = document.getElementById('sidebar-toggle-btn');
   const shell = document.querySelector('.app-shell');
 
   const COLLAPSED_KEY = 'hauers_sidebar_collapsed';
@@ -82,26 +81,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const collapsed = isCollapsed();
     sidebar.classList.toggle('collapsed', collapsed);
     shell.classList.toggle('sidebar-collapsed', collapsed);
-    // body class drives hamburger ✕ animation (navbar is fixed, outside .app-shell)
     document.body.classList.toggle('sidebar-collapsed', collapsed);
-    // Flip the collapse handle chevron to point right when collapsed
-    const handle = document.getElementById('sidebar-collapse-handle');
-    if (handle) {
-      handle.querySelector('polyline').setAttribute('points', collapsed ? '9 18 15 12 9 6' : '15 18 9 12 15 6');
-    }
   }
 
   // Restore persisted state immediately (no transition flash)
   applyCollapsedState(false);
 
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      localStorage.setItem(COLLAPSED_KEY, isCollapsed() ? '0' : '1');
-      applyCollapsedState(true);
-    });
-  }
-
-  // Sidebar collapse handle (the arrow button on the right border)
+  // Sidebar collapse handle (the hamburger button on the right border)
   const collapseHandle = document.getElementById('sidebar-collapse-handle');
   if (collapseHandle) {
     collapseHandle.addEventListener('click', () => {
@@ -130,26 +116,143 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /* ── 6. Populate navbar user info (runs on every page) ── */
+  let currentUser = null;
   try {
     const ur = await fetch('/reviewee/api/user');
     if (ur.ok) {
-      const u = await ur.json();
+      currentUser = await ur.json();
+      const u = currentUser;
       const avatarEl    = document.getElementById('nav-avatar');
       const userNameEl  = document.getElementById('nav-user-name');
       const userEmailEl = document.getElementById('nav-user-email');
       if (avatarEl)    avatarEl.textContent    = u.firstName[0].toUpperCase();
       if (userNameEl)  userNameEl.textContent  = `${u.firstName} ${u.lastName}`;
       if (userEmailEl) userEmailEl.textContent = u.email;
+
+      /* Sync profile popup fields */
+      const nppAvatar = document.getElementById('npp-avatar');
+      const nppName   = document.getElementById('npp-name');
+      const nppEmail  = document.getElementById('npp-email');
+      const nppRole   = document.getElementById('npp-role');
+      if (nppAvatar) nppAvatar.textContent = u.firstName[0].toUpperCase();
+      if (nppName)   nppName.textContent   = `${u.firstName} ${u.lastName}`;
+      if (nppEmail)  nppEmail.textContent  = u.email;
+      if (nppRole)   nppRole.textContent   = u.examLevel ? `${u.examLevel} Reviewee` : 'Reviewee';
     }
   } catch (_) {}
 
-  /* Nav-user click → navigate to learner profile (profile page handles its own modal) */
-  const navUserEl = document.getElementById('nav-user');
-  if (navUserEl && currentPath !== '/reviewee/learner-profile') {
-    navUserEl.addEventListener('click', () => {
-      window.location.href = '/reviewee/learner-profile';
+  /* Profile popup links for reviewee */
+  const nppEditLink     = document.getElementById('npp-edit-link');
+  const nppSettingsLink = document.getElementById('npp-settings-link');
+  if (nppEditLink)     nppEditLink.href     = '/reviewee/learner-profile';
+  if (nppSettingsLink) nppSettingsLink.href = '/reviewee/settings';
+
+  /* Nav-user click → toggle profile popup */
+  const navUserEl    = document.getElementById('nav-user');
+  const profilePopup = document.getElementById('nav-profile-popup');
+  if (navUserEl && profilePopup) {
+    navUserEl.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = !profilePopup.hidden;
+      profilePopup.hidden = isOpen;
+      navUserEl.setAttribute('aria-expanded', String(!isOpen));
+      /* Close notif panel if open */
+      const notifPanel = document.getElementById('nav-notif-panel');
+      if (notifPanel) notifPanel.hidden = true;
+    });
+    navUserEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navUserEl.click(); }
+      if (e.key === 'Escape') { profilePopup.hidden = true; navUserEl.setAttribute('aria-expanded', 'false'); }
     });
   }
+
+  /* ── Notification bell ──────────────────────────────── */
+  const NOTIF_KEY  = 'hauers_reviewee_notifs_read';
+  const revieweeNotifs = [
+    { id: 1, icon: '📋', text: 'Your study plan was updated for this week.',     time: '2 hours ago' },
+    { id: 2, icon: '✅', text: 'Diagnostic completed — you scored 78/100.',      time: '1 day ago'   },
+    { id: 3, icon: '📚', text: 'New review materials are available in your plan.', time: '2 days ago' },
+  ];
+
+  function initNotifications(notifs, storageKey) {
+    const readIds  = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    const unread   = notifs.filter(n => !readIds.includes(n.id));
+    const badge    = document.getElementById('nav-notif-badge');
+    const listEl   = document.getElementById('nav-notif-list');
+    const notifBtn = document.getElementById('nav-notif-btn');
+    const notifPanel = document.getElementById('nav-notif-panel');
+    const clearBtn = document.getElementById('nav-notif-clear');
+
+    function renderBadge() {
+      const u = notifs.filter(n => !JSON.parse(localStorage.getItem(storageKey) || '[]').includes(n.id));
+      if (badge) { badge.textContent = u.length; badge.hidden = u.length === 0; }
+    }
+
+    function renderList() {
+      if (!listEl) return;
+      const read = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      if (!notifs.length) {
+        listEl.innerHTML = '<div class="nav-notif-empty">No notifications</div>';
+        return;
+      }
+      listEl.innerHTML = notifs.map(n => {
+        const isRead = read.includes(n.id);
+        return `<div class="nav-notif-item${isRead ? ' read' : ''}" data-id="${n.id}">
+          <span class="nav-notif-icon">${n.icon}</span>
+          <div class="nav-notif-body">
+            <p class="nav-notif-text">${n.text}</p>
+            <span class="nav-notif-time">${n.time}</span>
+          </div>
+          ${isRead ? '' : '<span class="nav-notif-dot"></span>'}
+        </div>`;
+      }).join('');
+      listEl.querySelectorAll('.nav-notif-item:not(.read)').forEach(item => {
+        item.addEventListener('click', () => {
+          const id = Number(item.dataset.id);
+          const r  = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          if (!r.includes(id)) { r.push(id); localStorage.setItem(storageKey, JSON.stringify(r)); }
+          renderBadge(); renderList();
+        });
+      });
+    }
+
+    renderBadge();
+    renderList();
+
+    if (notifBtn && notifPanel) {
+      notifBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = !notifPanel.hidden;
+        notifPanel.hidden = isOpen;
+        /* Close profile popup if open */
+        if (profilePopup) { profilePopup.hidden = true; if (navUserEl) navUserEl.setAttribute('aria-expanded', 'false'); }
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        localStorage.setItem(storageKey, JSON.stringify(notifs.map(n => n.id)));
+        renderBadge(); renderList();
+      });
+    }
+  }
+
+  initNotifications(revieweeNotifs, NOTIF_KEY);
+
+  /* Close popups when clicking outside */
+  document.addEventListener('click', () => {
+    if (profilePopup) { profilePopup.hidden = true; if (navUserEl) navUserEl.setAttribute('aria-expanded', 'false'); }
+    const notifPanel = document.getElementById('nav-notif-panel');
+    if (notifPanel) notifPanel.hidden = true;
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (profilePopup) { profilePopup.hidden = true; if (navUserEl) navUserEl.setAttribute('aria-expanded', 'false'); }
+      const notifPanel = document.getElementById('nav-notif-panel');
+      if (notifPanel) notifPanel.hidden = true;
+    }
+  });
 
   /* ── 7. Fetch dashboard mock data and populate ─────────── */
   const isDashboard = currentPath === '/reviewee/dashboard';
