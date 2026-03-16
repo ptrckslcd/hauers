@@ -31,24 +31,21 @@
 
           <!-- Icon -->
           <div class="diag-intro-icon">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 11l3 3L22 4"/>
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-            </svg>
+            <span class="material-symbols-outlined" style="font-size:42px">fact_check</span>
           </div>
 
           <!-- Meta pills -->
           <div class="diag-meta-pills">
             <span class="diag-meta-pill">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <span class="material-symbols-outlined" style="font-size:16px">schedule</span>
               45 Minutes
             </span>
             <span class="diag-meta-pill">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span class="material-symbols-outlined" style="font-size:16px">description</span>
               15 Questions
             </span>
             <span class="diag-meta-pill">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span class="material-symbols-outlined" style="font-size:16px">public</span>
               3 Domains
             </span>
           </div>
@@ -105,7 +102,7 @@
         <div class="diag-exam-header">
           <span class="diag-q-counter" id="q-counter">Question 1 of 15</span>
           <div class="diag-timer-wrap">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <span class="material-symbols-outlined" style="font-size:16px">schedule</span>
             <span class="diag-timer" id="diag-timer">45:00</span>
           </div>
           <button class="cta-pill" id="btn-open-confirm" style="padding:0.45rem 1.15rem;font-size:0.82rem">
@@ -124,7 +121,7 @@
             <span class="q-domain-badge" id="q-domain-badge">Domain</span>
             <span class="q-difficulty" id="q-difficulty">Easy</span>
             <button class="q-flag-btn" id="btn-flag" title="Flag for review">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+              <span class="material-symbols-outlined" style="font-size:16px">flag</span>
               <span id="flag-label">Flag</span>
             </button>
           </div>
@@ -135,15 +132,15 @@
         <!-- Nav grid -->
         <div class="q-nav-legend">
           <div class="q-nav-legend-item">
-            <svg class="q-legend-dot" viewBox="0 0 12 12"><rect width="12" height="12" rx="3" fill="var(--fs-orange)"/></svg>
+            <div class="q-legend-dot" style="background:var(--fs-orange);border-radius:3px"></div>
             Answered
           </div>
           <div class="q-nav-legend-item">
-            <svg class="q-legend-dot" viewBox="0 0 12 12"><rect width="12" height="12" rx="3" fill="rgba(255,214,51,0.18)" stroke="var(--fs-yellow)" stroke-width="1.5"/></svg>
+            <div class="q-legend-dot" style="background:rgba(255,214,51,0.18);border:1.5px solid var(--fs-yellow);border-radius:3px"></div>
             Flagged
           </div>
           <div class="q-nav-legend-item">
-            <svg class="q-legend-dot" viewBox="0 0 12 12"><rect width="12" height="12" rx="3" fill="transparent" stroke="var(--border-subdued)" stroke-width="1.5"/></svg>
+            <div class="q-legend-dot" style="background:transparent;border:1.5px solid var(--border-subdued);border-radius:3px"></div>
             Unanswered
           </div>
         </div>
@@ -151,13 +148,13 @@
 
         <!-- Prev / Next controls -->
         <div class="q-controls">
-          <button class="q-btn" id="btn-prev">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <button class="q-btn" id="btn-prev" style="display:flex;align-items:center;gap:0.3rem">
+            <span class="material-symbols-outlined" style="font-size:18px">chevron_left</span>
             Previous
           </button>
-          <button class="q-btn" id="btn-next">
+          <button class="q-btn" id="btn-next" style="display:flex;align-items:center;gap:0.3rem">
             Next
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            <span class="material-symbols-outlined" style="font-size:18px">chevron_right</span>
           </button>
         </div>
 

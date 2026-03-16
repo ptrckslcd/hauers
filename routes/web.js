@@ -32,11 +32,13 @@ router.get('/reset-password', (req, res) => {
 });
 
 router.get('/terms', (req, res) => {
-  res.sendFile(path.join(__dirname, '../views/terms.html'));
+  const file = req.session && req.session.user ? 'terms.html' : 'terms-public.html';
+  res.sendFile(path.join(__dirname, '../views', file));
 });
 
 router.get('/privacy', (req, res) => {
-  res.sendFile(path.join(__dirname, '../views/privacy.html'));
+  const file = req.session && req.session.user ? 'privacy.html' : 'privacy-public.html';
+  res.sendFile(path.join(__dirname, '../views', file));
 });
 
 module.exports = router;

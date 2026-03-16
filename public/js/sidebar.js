@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     { label: 'Study Plan', href: '/reviewee/study-plan' },
     { label: 'Progress', href: '/reviewee/progress' },
     { label: 'Materials', href: '/reviewee/materials' },
-    { label: 'Settings', href: '/reviewee/settings' }
+    { label: 'Settings', href: '/reviewee/settings' },
+    { label: 'Terms of Use', href: '/terms' },
+    { label: 'Privacy Policy', href: '/privacy' }
   ];
 
   const adminLinks = [

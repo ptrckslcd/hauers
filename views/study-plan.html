@@ -65,7 +65,7 @@
       </div>
 
       <!-- ── This Week ── -->
-      <div class="dash-card">
+      <div class="dash-card" style="margin-bottom: 2.5rem;">
         <div class="sp-week-header">
           <span class="card-label">This Week</span>
           <span class="sp-week-range" id="sp-week-range">—</span>
@@ -75,7 +75,7 @@
       </div>
 
       <!-- ── Phase Timeline + Domain Coverage ── -->
-      <div class="dash-grid dash-grid--2col">
+      <div class="dash-grid dash-grid--2col" style="margin-bottom: 2.5rem;">
 
         <!-- Phase Timeline -->
         <div class="dash-card">
@@ -92,16 +92,12 @@
           <div class="sp-divider"></div>
           <span class="sp-section-label">Weak Domains</span>
           <div class="sp-weak-tags" id="sp-weak-tags"></div>
-          <div class="sp-focus-box">
-            <div class="sp-focus-label">Recommended Focus</div>
-            <div class="sp-focus-text" id="sp-recommended-focus">—</div>
-          </div>
         </div>
 
       </div>
 
       <!-- ── Recommended Resources ── -->
-      <div class="dash-card">
+      <div class="dash-card" style="margin-bottom: 2.5rem;">
         <span class="card-label">Recommended Resources</span>
         <p class="card-sub">Curated study materials per domain</p>
         <div class="sp-resources-grid" id="sp-resources"></div>
@@ -127,6 +123,21 @@
   <script src="/js/app-shell.js"></script>
   <script>
   (function () {
+    /* ── Stats Count-up utility ── */
+    function animateValue(obj, start, end, duration, isScore = false) {
+      if (!obj) return;
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const val = Math.floor(progress * (end - start) + start);
+        obj.innerHTML = isScore ? `${val}%` : val;
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    }
 
     function daysUntil(dateStr) {
       const diff = Math.ceil((new Date(dateStr) - new Date()) / 864e5);
@@ -153,13 +164,13 @@
               <span class="sp-goal-frac">${r.done} / ${r.total}</span>
             </div>
             <div class="sp-goal-track">
-              <div class="sp-goal-fill" data-target="${pct}"></div>
+              <div class="sp-goal-fill" style="width: 0%" data-target="${pct}"></div>
             </div>
           </div>`;
       }).join('');
       requestAnimationFrame(() => {
         document.querySelectorAll('#sp-goal-rows .sp-goal-fill').forEach(el => {
-          el.style.width = el.dataset.target + '%';
+          setTimeout(() => { el.style.width = el.dataset.target + '%'; }, 100);
         });
       });
     }
@@ -167,22 +178,38 @@
     /* ── Week grid ── */
     function buildWeekGrid(tasks) {
       const todayStr = new Date().toISOString().slice(0, 10);
-      const checkSvg = `<svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-      document.getElementById('sp-week-grid').innerHTML = tasks.map(d => {
+      const container = document.getElementById('sp-week-grid');
+      
+      container.innerHTML = tasks.map(d => {
         const isToday = d.date === todayStr || d.day === 'Thu';
         const cls = ['sp-day-card', d.done ? 'done' : '', isToday ? 'today' : ''].filter(Boolean).join(' ');
         const statusCls = d.done ? 'done' : (isToday ? 'today' : '');
         const taskLines = d.tasks.map(t => `<div class="sp-day-task">${t}</div>`).join('');
         return `
-          <div class="${cls}">
+          <div class="${cls}" data-done="${d.done}">
             <div class="sp-day-top">
               <span class="sp-day-name">${d.day}</span>
-              <span class="sp-day-status ${statusCls}">${d.done ? checkSvg : ''}</span>
+              <span class="sp-day-status ${statusCls}">
+                <span class="material-symbols-outlined" style="font-size:12px;color:#fff;font-weight:bold;display:${d.done ? 'block' : 'none'}">check</span>
+              </span>
             </div>
             <div class="sp-day-date">${d.date ? d.date.slice(5).replace('-', '/') : ''}</div>
             <div class="sp-day-tasks">${taskLines}</div>
           </div>`;
       }).join('');
+
+      container.querySelectorAll('.sp-day-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const isDone = card.getAttribute('data-done') === 'true';
+          const next = !isDone;
+          card.setAttribute('data-done', next);
+          card.classList.toggle('done', next);
+          const status = card.querySelector('.sp-day-status');
+          status.classList.toggle('done', next);
+          status.querySelector('.material-symbols-outlined').style.display = next ? 'block' : 'none';
+        });
+      });
+
       if (tasks.length) {
         document.getElementById('sp-week-range').textContent =
           fmtDate(tasks[0].date) + ' – ' + fmtDate(tasks[tasks.length - 1].date);
@@ -191,7 +218,7 @@
 
     /* ── Phase timeline ── */
     function buildPhases(phases) {
-      const checkSvg = `<svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      const checkSvg = `<span class="material-symbols-outlined" style="font-size:14px;color:#fff;font-weight:bold">check</span>`;
       document.getElementById('sp-phases').innerHTML = phases.map(p => {
         const dotCls = p.done ? ' done' : p.current ? ' current' : '';
         const dot = `<div class="sp-phase-dot${dotCls}">${p.done ? checkSvg : ''}</div>`;
@@ -234,16 +261,22 @@
               <span class="sp-domain-name">
                 ${name}${isWeak ? ' <span class="sp-weak-label">⚠ weak</span>' : ''}
               </span>
-              <span class="sp-domain-score">${score}%</span>
+              <span class="sp-domain-score" data-score="${score}">0%</span>
             </div>
             <div class="sp-domain-track">
-              <div class="sp-domain-fill" style="background:${color}" data-target="${score}"></div>
+              <div class="sp-domain-fill" style="background:${color}; width: 0%" data-target="${score}"></div>
             </div>
           </div>`;
       }).join('');
       requestAnimationFrame(() => {
-        document.querySelectorAll('#sp-domain-bars .sp-domain-fill').forEach(el => {
-          el.style.width = el.dataset.target + '%';
+        document.querySelectorAll('#sp-domain-bars .sp-domain-bar-row').forEach(row => {
+          const fill = row.querySelector('.sp-domain-fill');
+          const scoreEl = row.querySelector('.sp-domain-score');
+          const target = parseInt(fill.dataset.target);
+          setTimeout(() => { 
+            fill.style.width = target + '%';
+            animateValue(scoreEl, 0, target, 1200, true);
+          }, 150);
         });
       });
     }
@@ -263,12 +296,23 @@
       document.getElementById('sp-resources').innerHTML = resources.map(r => `
         <div class="sp-resource-card">
           <div class="sp-resource-header">
-            <span class="sp-resource-icon">${r.icon}</span>
+            <div class="sp-resource-icon">
+              <span class="material-symbols-outlined">${
+                r.domain.includes('Verbal') ? 'record_voice_over' : 
+                r.domain.includes('Numerical') ? 'calculate' : 
+                r.domain.includes('Clerical') ? 'inventory_2' : 'auto_stories'
+              }</span>
+            </div>
             <span class="sp-resource-name">${r.domain}</span>
           </div>
-          <ul class="sp-resource-list">
-            ${r.items.map(i => `<li>${i}</li>`).join('')}
-          </ul>
+          <div class="sp-resource-list">
+            ${r.items.map(i => `
+              <a href="#" class="sp-resource-item">
+                <span class="sp-ri-label">${i}</span>
+                <span class="material-symbols-outlined sp-ri-launch">arrow_circle_right</span>
+              </a>
+            `).join('')}
+          </div>
         </div>`).join('');
     }
 
@@ -282,9 +326,13 @@
       const days     = daysUntil(sp.examDate);
       const weeksLeft = sp.totalWeeks - sp.currentWeek;
 
-      document.getElementById('sp-days-num').textContent      = days;
+      const daysNumEl = document.getElementById('sp-days-num');
+      const weeksLeftEl = document.getElementById('sp-weeks-left');
+      
+      animateValue(daysNumEl, 0, days, 1000);
+      animateValue(weeksLeftEl, 0, weeksLeft, 800);
+      
       document.getElementById('sp-days-badge').textContent    = days + ' days left';
-      document.getElementById('sp-weeks-left').textContent    = weeksLeft;
       document.getElementById('sp-current-week').textContent  = sp.currentWeek;
       document.getElementById('sp-week-badge').textContent    = 'Week ' + sp.currentWeek + ' of ' + sp.totalWeeks;
       document.getElementById('sp-exam-date-label').textContent = 'Target: ' + fmtDate(sp.examDate);
@@ -299,13 +347,10 @@
       const weakDomains = dash && dash.weakDomains
         ? dash.weakDomains
         : ['Numerical Ability', 'Clerical Ability'];
-      const focus = dash && dash.recommendedFocus
-        ? dash.recommendedFocus
-        : 'Fractions, percentages, and clerical drills';
 
       buildDomainBars(domainScores, weakDomains);
       buildWeakTags(weakDomains);
-      document.getElementById('sp-recommended-focus').textContent = focus;
+      
       buildResources(sp.resources);
 
     }).catch(err => console.error('[study-plan]', err));

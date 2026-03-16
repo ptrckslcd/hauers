@@ -40,11 +40,7 @@
           </p>
         </div>
         <a href="/admin/analytics" class="cta-pill">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.45rem;flex-shrink:0">
-            <line x1="18" y1="20" x2="18" y2="10"/>
-            <line x1="12" y1="20" x2="12" y2="4"/>
-            <line x1="6"  y1="20" x2="6"  y2="14"/>
-          </svg>
+          <span class="material-symbols-outlined" style="font-size:18px;margin-right:0.45rem">analytics</span>
           View Analytics
         </a>
       </header>
@@ -57,17 +53,15 @@
           <div class="admin-kpi-header">
             <span class="card-label">Total Users</span>
             <span class="admin-kpi-icon admin-kpi-icon--blue">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
+              <span class="material-symbols-outlined">group</span>
             </span>
           </div>
           <span class="admin-kpi-val" id="stat-total-users">—</span>
           <span class="card-sub">registered accounts</span>
-          <span class="admin-kpi-delta admin-kpi-delta--up">+14 this week</span>
+          <span class="admin-kpi-delta admin-kpi-delta--up">
+            <span class="material-symbols-outlined" style="font-size:14px">trending_up</span>
+            +14 this week
+          </span>
         </div>
 
         <!-- Active Reviewees -->
@@ -75,10 +69,7 @@
           <div class="admin-kpi-header">
             <span class="card-label">Active Reviewees</span>
             <span class="admin-kpi-icon admin-kpi-icon--green">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
+              <span class="material-symbols-outlined">person_play</span>
             </span>
           </div>
           <span class="admin-kpi-val" id="stat-active-reviewees">—</span>
@@ -91,14 +82,15 @@
           <div class="admin-kpi-header">
             <span class="card-label">Avg. Readiness</span>
             <span class="admin-kpi-icon admin-kpi-icon--orange">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-              </svg>
+              <span class="material-symbols-outlined">speed</span>
             </span>
           </div>
           <span class="admin-kpi-val" id="stat-avg-readiness">—</span>
           <span class="card-sub">platform score</span>
-          <span class="admin-kpi-delta admin-kpi-delta--warn">12 pts below pass mark</span>
+          <span class="admin-kpi-delta admin-kpi-delta--warn">
+            <span class="material-symbols-outlined" style="font-size:14px">warning</span>
+            12 pts below pass mark
+          </span>
         </div>
 
         <!-- New Signups -->
@@ -106,12 +98,7 @@
           <div class="admin-kpi-header">
             <span class="card-label">New This Week</span>
             <span class="admin-kpi-icon admin-kpi-icon--pink">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-                <line x1="19" y1="8" x2="19" y2="14"/>
-                <line x1="22" y1="11" x2="16" y2="11"/>
-              </svg>
+              <span class="material-symbols-outlined">person_add</span>
             </span>
           </div>
           <span class="admin-kpi-val" id="stat-new-signups">—</span>
@@ -159,82 +146,82 @@
 
       </div>
 
-      <!-- ── Row 3: Recent Activity · Quick Actions ──────── -->
+      <!-- ── Row 3: Recent Activity · Broadcasts & Actions ──────── -->
       <div class="dash-grid dash-grid--split21">
 
         <!-- Recent Activity -->
         <div class="dash-card">
-          <span class="card-label">Recent Activity</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem">
+            <span class="card-label">Recent Activity</span>
+            <a href="/admin/users" class="card-link" style="font-size:0.75rem">View all →</a>
+          </div>
           <p class="card-sub">Latest platform events</p>
           <div id="activity-feed" class="activity-feed" style="margin-top:0.65rem"></div>
-          <a href="/admin/users" class="card-link" style="margin-top:0.75rem">View all users →</a>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="dash-card">
-          <span class="card-label">Quick Actions</span>
-          <div class="quick-actions" style="flex:1;margin-top:0.35rem">
+        <!-- Quick Actions & Announces -->
+        <div style="display:flex; flex-direction:column; gap:1.25rem">
+          <!-- Active Announcements (Integration) -->
+          <div class="dash-card">
+            <span class="card-label">Announcement Status</span>
+            <div id="active-broadcast-status" style="margin-top:0.75rem">
+              <div style="display:flex; align-items:center; gap:0.75rem; color:var(--text-subdued); font-size:0.82rem">
+                <span class="material-symbols-outlined" style="color:var(--fs-orange)">campaign</span>
+                <span id="broadcast-count">Loading status...</span>
+              </div>
+              <a href="/admin/announcements" class="card-link" style="margin-top:0.45rem; display:block">Manage broadcasts →</a>
+            </div>
+          </div>
 
-            <a href="/admin/users" class="qa-btn">
-              <span class="qa-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </span>
-              <span class="qa-label">Manage Users</span>
-              <svg class="qa-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </a>
+          <div class="dash-card" style="padding-bottom:1.5rem">
+            <span class="card-label">Quick Actions</span>
+            <div class="quick-actions" style="margin-top:0.75rem">
 
-            <a href="/admin/question-bank" class="qa-btn">
-              <span class="qa-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                  <line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5"/>
-                </svg>
-              </span>
-              <span class="qa-label">Question Bank</span>
-              <svg class="qa-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </a>
+              <a href="/admin/users" class="qa-btn">
+                <span class="qa-icon" style="background:rgba(96,165,250,0.12);color:#3b82f6">
+                  <span class="material-symbols-outlined">manage_accounts</span>
+                </span>
+                <span class="qa-label">Manage Users</span>
+                <span class="material-symbols-outlined qa-arrow">chevron_right</span>
+              </a>
 
-            <a href="/admin/analytics" class="qa-btn">
-              <span class="qa-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="20" x2="18" y2="10"/>
-                  <line x1="12" y1="20" x2="12" y2="4"/>
-                  <line x1="6"  y1="20" x2="6"  y2="14"/>
-                </svg>
-              </span>
-              <span class="qa-label">Analytics</span>
-              <svg class="qa-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </a>
+              <a href="/admin/question-bank" class="qa-btn">
+                <span class="qa-icon" style="background:rgba(167,139,250,0.12);color:#8b5cf6">
+                  <span class="material-symbols-outlined">quiz</span>
+                </span>
+                <span class="qa-label">Question Bank</span>
+                <span class="material-symbols-outlined qa-arrow">chevron_right</span>
+              </a>
 
+              <a href="/admin/announcements" class="qa-btn">
+                <span class="qa-icon" style="background:rgba(255,153,51,0.12);color:var(--fs-orange)">
+                  <span class="material-symbols-outlined">campaign</span>
+                </span>
+                <span class="qa-label">Broadcasting</span>
+                <span class="material-symbols-outlined qa-arrow">chevron_right</span>
+              </a>
+
+            </div>
           </div>
         </div>
 
-      </div>
-
-      <!-- ── CTA Banner ──────────────────────────────────── -->
-      <div class="dash-cta">
-        <div class="dash-cta-text">
-          <h3>Ready for deeper insights?</h3>
-          <p>Explore domain trends, question performance, and individual reviewee progress in the full analytics suite.</p>
-        </div>
-        <a href="/admin/analytics" class="cta-pill">Open Analytics</a>
       </div>
 
     </main>
   </div>
 
   <script src="/js/admin-shell.js"></script>
+  <script>
+    (async () => {
+      // Sync broadcast count from storage
+      const broadcasts = JSON.parse(localStorage.getItem('hauers_broadcasts') || '[]');
+      const countEl = document.getElementById('broadcast-count');
+      if (countEl) {
+        countEl.textContent = broadcasts.length > 0 
+          ? `${broadcasts.length} active broadcast${broadcasts.length > 1 ? 's' : ''}`
+          : 'No active announcements';
+      }
+    })();
+  </script>
 </body>
 </html>

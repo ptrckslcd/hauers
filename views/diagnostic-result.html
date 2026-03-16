@@ -38,9 +38,7 @@
           </p>
         </div>
         <a href="/reviewee/diagnostic" class="cta-pill">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.4rem;flex-shrink:0">
-            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
-          </svg>
+          <span class="material-symbols-outlined" style="font-size:18px;margin-right:0.4rem">refresh</span>
           Retake Diagnostic
         </a>
       </header>
@@ -137,48 +135,32 @@
           <span class="card-label">Next Steps</span>
           <div class="quick-actions">
             <a href="/reviewee/study-plan" class="qa-btn">
-              <span class="qa-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                  <polyline points="9 16 11 18 15 14"/>
-                </svg>
+              <span class="qa-icon" style="background:rgba(45,212,191,0.1);color:#2dd4bf">
+                <span class="material-symbols-outlined">event_note</span>
               </span>
               <span class="qa-label">View Personalised Study Plan</span>
-              <svg class="qa-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <span class="material-symbols-outlined qa-arrow">chevron_right</span>
             </a>
             <a href="/reviewee/quiz" class="qa-btn">
-              <span class="qa-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                  <line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5"/>
-                </svg>
+              <span class="qa-icon" style="background:rgba(255,153,51,0.1);color:var(--fs-orange)">
+                <span class="material-symbols-outlined">quiz</span>
               </span>
               <span class="qa-label">Practice Weak Domains</span>
-              <svg class="qa-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <span class="material-symbols-outlined qa-arrow">chevron_right</span>
             </a>
             <a href="/reviewee/materials" class="qa-btn">
-              <span class="qa-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                </svg>
+              <span class="qa-icon" style="background:rgba(129,140,248,0.1);color:#818cf8">
+                <span class="material-symbols-outlined">import_contacts</span>
               </span>
               <span class="qa-label">Review Study Materials</span>
-              <svg class="qa-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <span class="material-symbols-outlined qa-arrow">chevron_right</span>
             </a>
             <a href="/reviewee/diagnostic" class="qa-btn">
-              <span class="qa-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="1 4 1 10 7 10"/>
-                  <path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
-                </svg>
+              <span class="qa-icon" style="background:rgba(167,139,250,0.1);color:#a78bfa">
+                <span class="material-symbols-outlined">refresh</span>
               </span>
               <span class="qa-label">Retake Diagnostic</span>
-              <svg class="qa-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <span class="material-symbols-outlined qa-arrow">chevron_right</span>
             </a>
           </div>
         </div>
@@ -188,10 +170,10 @@
       <!-- CTA Banner -->
       <div class="dash-cta">
         <div class="dash-cta-text">
-          <h3>Keep pushing toward your target score.</h3>
-          <p>Review your study plan and practice the domains where you scored below 70%. Consistent daily effort is the fastest path to passing.</p>
+          <h3>Ready to start your structured review?</h3>
+          <p>Head to your dashboard to view your study plan, track progress, and practice the domains where you need focus. Consistent effort is the fastest path back to passing.</p>
         </div>
-        <a href="/reviewee/study-plan" class="cta-pill">Go to Study Plan</a>
+        <a href="/reviewee/dashboard" class="cta-pill">Go to Dashboard</a>
       </div>
 
     </main>
@@ -358,13 +340,13 @@
       'Numerical Ability': 'Drill fractions, percentages, ratios, and basic algebra problems regularly.',
       'Clerical Ability':  'Practice alphabetical filing, proofreading, and clerical data verification.',
     };
-    const tipsEl = document.getElementById('result-tips');
+  const tipsEl = document.getElementById('result-tips');
     if (tipsEl && result.domainScores) {
       const weakDoms = result.domainScores.filter(d => d.score < 80);
       tipsEl.innerHTML = weakDoms.map(d =>
         `<div class="result-tip">
            <div class="result-tip-icon">
-             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+             <span class="material-symbols-outlined" style="font-size:14px;font-weight:bold">check</span>
            </div>
            <span>${domainTips[d.domain] || 'Review study materials for this domain.'}</span>
          </div>`

@@ -32,6 +32,7 @@
       </header>
 
       <!-- ── Row 1: Stats ── -->
+      <!-- ── Row 1: Stats ── -->
       <div class="dash-grid" id="rm-stats-row">
 
         <!-- Total materials -->
@@ -67,9 +68,31 @@
 
       </div>
 
+      <!-- ── Priority: Recommended Spotlight ── -->
+      <section class="rm-priority-section" id="rm-priority">
+        <div class="rm-priority-header">
+          <span class="rm-priority-badge">
+            <span class="material-symbols-outlined" style="font-size:16px">bolt</span>
+            PRIORITY FOR YOU
+          </span>
+          <p style="font-size:0.85rem;color:var(--text-subdued)">Based on your latest Diagnostic Assessment</p>
+        </div>
+        <div class="rm-priority-grid" id="rm-priority-grid">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
       <!-- ── Search bar ── -->
       <div id="rm-search"></div>
       <p class="sw-result-msg" id="rm-result-msg"></p>
+
+      <!-- ── Content Organization Tabs ── -->
+      <div class="rm-tabs" id="rm-type-tabs">
+        <button class="rm-tab active" data-type="all">All Resources</button>
+        <button class="rm-tab" data-type="Reading">Reading Materials</button>
+        <button class="rm-tab" data-type="Video">Video Lectures</button>
+        <button class="rm-tab" data-type="Drill Set">Practice Exams</button>
+      </div>
 
       <!-- ── Filter bar ── -->
       <div class="rm-filter-bar">
@@ -79,13 +102,6 @@
           <button class="rm-filter-chip" data-filter="domain" data-val="Verbal Ability">Verbal</button>
           <button class="rm-filter-chip" data-filter="domain" data-val="Numerical Ability">Numerical</button>
           <button class="rm-filter-chip" data-filter="domain" data-val="Clerical Ability">Clerical</button>
-        </div>
-        <div class="rm-filter-row">
-          <span class="rm-filter-label">Type</span>
-          <button class="rm-filter-chip active" data-filter="type" data-val="all">All Types</button>
-          <button class="rm-filter-chip" data-filter="type" data-val="Drill Set">Drill Set</button>
-          <button class="rm-filter-chip" data-filter="type" data-val="Practice Exam">Practice Exam</button>
-          <button class="rm-filter-chip" data-filter="type" data-val="Reference">Reference</button>
         </div>
       </div>
 
@@ -190,36 +206,70 @@
       return h > 0 ? `${h}h ${mins}m` : `${mins}m`;
     }
 
-    /* ── Render cards ────────────────────────────────────── */
+    /* ── Mock Progress & Status ──────────────────────────── */
+    materials.forEach((m, idx) => {
+      if (idx % 7 === 0) { m.status = 'mastered'; m.progress = 100; }
+      else if (idx % 3 === 0) { m.status = 'in-progress'; m.progress = Math.floor(Math.random() * 80) + 10; }
+      else { m.status = 'new'; m.progress = 0; }
+    });
+
+    /* ── Render Card HTML ────────────────────────────────── */
+    function createCardHtml(m) {
+      const isRec = m.recommended;
+      const statusCls = m.status === 'mastered' ? 'rm-status--mastered' : (m.status === 'in-progress' ? 'rm-status--progress' : 'rm-status--new');
+      const statusText = m.status === 'mastered' ? 'Mastered' : (m.status === 'in-progress' ? 'In Progress' : 'New');
+      
+      return `
+        <div class="rm-card ${isRec ? 'rm-card--recommended' : ''}" data-domain="${m.domain}" data-type="${m.type}">
+          <div class="rm-card-top">
+            <span class="rm-status-badge ${statusCls}">${statusText}</span>
+            <span class="rm-type">${m.icon} ${m.type}</span>
+          </div>
+          
+          <span class="q-domain-badge ${domainClass(m.domain)}" style="margin-bottom:0.5rem">${m.domain.replace(' Ability','')}</span>
+          <div class="rm-card-title">${m.title}</div>
+          <div class="rm-card-desc">${m.desc}</div>
+
+          <div class="rm-card-progress-wrap">
+            <div class="rm-card-progress-label">
+              <span>Progress</span>
+              <span>${m.progress}%</span>
+            </div>
+            <div class="rm-card-progress-track">
+              <div class="rm-card-progress-fill" style="width: ${m.progress}%"></div>
+            </div>
+          </div>
+
+          <div class="rm-card-meta">
+            <div class="rm-card-meta-left">
+              <span class="rm-diff ${diffClass(m.difficulty)}">${m.difficulty}</span>
+              <span class="rm-time">⏱ ${fmtMins(m.estMinutes)}</span>
+            </div>
+            <div class="rm-card-actions">
+              <button class="rm-quick-practice-btn" onclick="window.location.href='/reviewee/quiz'">
+                <span class="material-symbols-outlined" style="font-size:14px">bolt</span>
+                Quiz
+              </button>
+              <a href="#" class="rm-study-btn">Study →</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ── Render grids ────────────────────────────────────── */
     const grid      = document.getElementById('rm-grid');
+    const priGrid   = document.getElementById('rm-priority-grid');
     const resultMsg = document.getElementById('rm-result-msg');
+
     function renderCards(list) {
       if (!grid) return;
       if (!list.length) {
-        grid.innerHTML = '<div class="rm-no-results"><span class="rm-no-icon">🔍</span>No materials match your search.</div>';
+        grid.innerHTML = '<div class="rm-no-results"><span class="rm-no-icon">🔍</span>No materials match your filters.</div>';
         if (resultMsg) resultMsg.textContent = '';
         return;
       }
-      grid.innerHTML = list.map(m => {
-        const cardCls  = m.recommended ? 'rm-card rm-card--recommended' : 'rm-card';
-        const recBadge = m.recommended
-          ? `<span class="rm-rec-badge">⭐ Recommended</span>`
-          : '';
-        return `<div class="${cardCls}" data-domain="${m.domain}" data-type="${m.type}">` +
-          `<div class="rm-card-top">` +
-          `<span class="q-domain-badge ${domainClass(m.domain)}">${m.domain.replace(' Ability','')}</span>` +
-          `<span class="rm-type">${m.icon} ${m.type}</span>` +
-          recBadge +
-          `</div>` +
-          `<div class="rm-card-title">${m.title}</div>` +
-          `<div class="rm-card-desc">${m.desc}</div>` +
-          `<div class="rm-card-meta">` +
-          `<span class="rm-diff ${diffClass(m.difficulty)}">${m.difficulty}</span>` +
-          `<span class="rm-time">⏱ ${fmtMins(m.estMinutes)}</span>` +
-          `<a href="/reviewee/quiz" class="rm-study-btn">Study →</a>` +
-          `</div>` +
-          `</div>`;
-      }).join('');
+      grid.innerHTML = list.map(m => createCardHtml(m)).join('');
       if (resultMsg) {
         resultMsg.textContent = list.length < materials.length
           ? 'Showing ' + list.length + ' of ' + materials.length + ' materials'
@@ -227,19 +277,25 @@
       }
     }
 
-    /* ── Active chip state ───────────────────────────────── */
+    /* ── Initial Render ──────────────────────────────────── */
+    const pms = materials.filter(m => m.recommended).slice(0, 3);
+    if (priGrid) priGrid.innerHTML = pms.map(m => createCardHtml(m)).join('');
+    renderCards(materials);
+
+    /* ── Filter Logic ────────────────────────────────────── */
     let activeDomain = 'all';
     let activeType   = 'all';
-    function applyChips(list) {
+
+    function applyFilters(list) {
       return list.filter(m => {
         const dm = activeDomain === 'all' || m.domain === activeDomain;
-        const tm = activeType   === 'all' || m.type   === activeType;
+        const tm = activeType === 'all' || 
+                   (activeType === 'Reading' && (m.type === 'Reference' || m.type === 'Manual')) ||
+                   (activeType === 'Video' && m.type === 'Video') ||
+                   (activeType === 'Drill Set' && (m.type === 'Drill Set' || m.type === 'Practice Exam'));
         return dm && tm;
       });
     }
-
-    /* ── Initial render ──────────────────────────────────── */
-    renderCards(materials);
 
     /* ── Search widget ───────────────────────────────────── */
     const sw = new SearchWidget({
@@ -248,9 +304,22 @@
       apiUrl:        '/reviewee/api/search',
       defaultParams: { scope: 'materials' },
       onResults: results => renderCards(results),
-      onClear:   ()      => renderCards(applyChips(materials)),
+      onClear:   ()      => renderCards(applyFilters(materials)),
     });
     sw.mount();
+
+    /* ── Tabs Interaction ────────────────────────────────── */
+    document.querySelectorAll('.rm-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.rm-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeType = tab.dataset.type;
+        renderCards(applyFilters(materials));
+        
+        const priSection = document.getElementById('rm-priority');
+        if (priSection) priSection.style.display = activeType === 'all' ? 'block' : 'none';
+      });
+    });
 
     /* ── Filter chips ────────────────────────────────────── */
     document.querySelectorAll('.rm-filter-chip').forEach(chip => {
@@ -260,14 +329,13 @@
         document.querySelectorAll('.rm-filter-chip[data-filter="' + filterKey + '"]')
           .forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
+        
         if (filterKey === 'domain') activeDomain = val;
-        if (filterKey === 'type')   activeType   = val;
+
         if (sw.getValue()) {
-          // Active search: pass updated filters to the server
-          sw.setParams({ domain: activeDomain, type: activeType });
+          sw.setParams({ domain: activeDomain });
         } else {
-          // No search query: filter client-side
-          renderCards(applyChips(materials));
+          renderCards(applyFilters(materials));
         }
       });
     });

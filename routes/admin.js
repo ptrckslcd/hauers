@@ -32,6 +32,14 @@ router.get('/analytics', requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, '../views/admin-analytics.html'));
 });
 
+router.get('/materials', requireAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, '../views/admin-materials.html'));
+});
+
+router.get('/announcements', requireAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, '../views/admin-announcements.html'));
+});
+
 router.get('/settings', requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, '../views/admin-account-settings.html'));
 });

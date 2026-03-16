@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (nppEditLink) nppEditLink.style.display = 'none';
   if (nppSettingsLink) {
     nppSettingsLink.href = '/admin/settings';
-    nppSettingsLink.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Account Settings';
+    nppSettingsLink.innerHTML = '<span class="npp-icon material-symbols-outlined">settings</span>Account Settings';
   }
 
   /* Nav-user click → toggle profile popup */
@@ -152,41 +152,63 @@ document.addEventListener('DOMContentLoaded', async () => {
   ];
 
   function initAdminNotifications(notifs, storageKey) {
+    const DISMISSED_KEY = storageKey + '_dismissed';
     const badge      = document.getElementById('nav-notif-badge');
     const listEl     = document.getElementById('nav-notif-list');
     const notifBtn   = document.getElementById('nav-notif-btn');
     const notifPanel = document.getElementById('nav-notif-panel');
     const clearBtn   = document.getElementById('nav-notif-clear');
 
+    function getRead()      { return JSON.parse(localStorage.getItem(storageKey) || '[]'); }
+    function getDismissed() { return JSON.parse(localStorage.getItem(DISMISSED_KEY) || '[]'); }
+    function getVisible()   { const d = getDismissed(); return notifs.filter(n => !d.includes(n.id)); }
+
     function renderBadge() {
-      const read = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      const u = notifs.filter(n => !read.includes(n.id));
-      if (badge) { badge.textContent = u.length; badge.hidden = u.length === 0; }
+      const unread = getVisible().filter(n => !getRead().includes(n.id));
+      if (badge) { badge.textContent = unread.length; badge.hidden = unread.length === 0; }
     }
 
     function renderList() {
       if (!listEl) return;
-      const read = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      if (!notifs.length) {
-        listEl.innerHTML = '<div class="nav-notif-empty">No notifications</div>';
+      const visible = getVisible();
+      const read    = getRead();
+      if (!visible.length) {
+        listEl.innerHTML = '<div class="nav-notif-empty">You\'re all caught up 🎉</div>';
         return;
       }
-      listEl.innerHTML = notifs.map(n => {
+      listEl.innerHTML = visible.map(n => {
         const isRead = read.includes(n.id);
-        return `<div class="nav-notif-item${isRead ? ' read' : ''}" data-id="${n.id}">
-          <span class="nav-notif-icon">${n.icon}</span>
-          <div class="nav-notif-body">
-            <p class="nav-notif-text">${n.text}</p>
-            <span class="nav-notif-time">${n.time}</span>
-          </div>
-          ${isRead ? '' : '<span class="nav-notif-dot"></span>'}
-        </div>`;
+        return `
+          <div class="nav-notif-item${isRead ? ' read' : ''}" data-id="${n.id}">
+            <span class="nav-notif-icon">${n.icon}</span>
+            <div class="nav-notif-body">
+              <p class="nav-notif-text">${n.text}</p>
+              <span class="nav-notif-time">${n.time}</span>
+            </div>
+            ${isRead ? '' : '<span class="nav-notif-dot"></span>'}
+            <div class="nav-notif-actions">
+              ${!isRead ? `<button class="nav-notif-action-btn mark-read" title="Mark as read" data-id="${n.id}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>` : ''}
+              <button class="nav-notif-action-btn dismiss" title="Dismiss" data-id="${n.id}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+          </div>`;
       }).join('');
-      listEl.querySelectorAll('.nav-notif-item:not(.read)').forEach(item => {
-        item.addEventListener('click', () => {
-          const id = Number(item.dataset.id);
-          const r  = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+      listEl.querySelectorAll('.nav-notif-action-btn.mark-read').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const id = Number(btn.dataset.id);
+          const r  = getRead();
           if (!r.includes(id)) { r.push(id); localStorage.setItem(storageKey, JSON.stringify(r)); }
+          renderBadge(); renderList();
+        });
+      });
+
+      listEl.querySelectorAll('.nav-notif-action-btn.dismiss').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const id = Number(btn.dataset.id);
+          const d  = getDismissed();
+          if (!d.includes(id)) { d.push(id); localStorage.setItem(DISMISSED_KEY, JSON.stringify(d)); }
           renderBadge(); renderList();
         });
       });
@@ -207,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (clearBtn) {
       clearBtn.addEventListener('click', e => {
         e.stopPropagation();
-        localStorage.setItem(storageKey, JSON.stringify(notifs.map(n => n.id)));
+        localStorage.setItem(storageKey, JSON.stringify(getVisible().map(n => n.id)));
         renderBadge(); renderList();
       });
     }

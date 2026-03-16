@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /* ── Notification bell ──────────────────────────────── */
-  const NOTIF_KEY  = 'hauers_reviewee_notifs_read';
+  const NOTIF_KEY  = 'hauers_reviewee_notifs_read_v2';
   const revieweeNotifs = [
     { id: 1, icon: '📋', text: 'Your study plan was updated for this week.',     time: '2 hours ago' },
     { id: 2, icon: '✅', text: 'Diagnostic completed — you scored 78/100.',      time: '1 day ago'   },
@@ -175,42 +175,84 @@ document.addEventListener('DOMContentLoaded', async () => {
   ];
 
   function initNotifications(notifs, storageKey) {
-    const readIds  = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    const unread   = notifs.filter(n => !readIds.includes(n.id));
-    const badge    = document.getElementById('nav-notif-badge');
-    const listEl   = document.getElementById('nav-notif-list');
-    const notifBtn = document.getElementById('nav-notif-btn');
+    const DISMISSED_KEY = storageKey + '_dismissed';
+    const badge      = document.getElementById('nav-notif-badge');
+    const listEl     = document.getElementById('nav-notif-list');
+    const notifBtn   = document.getElementById('nav-notif-btn');
     const notifPanel = document.getElementById('nav-notif-panel');
-    const clearBtn = document.getElementById('nav-notif-clear');
+    const clearBtn   = document.getElementById('nav-notif-clear');
+
+    function getRead()      { return JSON.parse(localStorage.getItem(storageKey) || '[]'); }
+    function getDismissed() { return JSON.parse(localStorage.getItem(DISMISSED_KEY) || '[]'); }
+
+    function getVisible() {
+      const dismissed = getDismissed();
+      return notifs.filter(n => !dismissed.includes(n.id));
+    }
 
     function renderBadge() {
-      const u = notifs.filter(n => !JSON.parse(localStorage.getItem(storageKey) || '[]').includes(n.id));
-      if (badge) { badge.textContent = u.length; badge.hidden = u.length === 0; }
+      const read = getRead();
+      const unread = getVisible().filter(n => !read.includes(n.id));
+      if (badge) {
+        badge.textContent = unread.length;
+        badge.hidden = unread.length === 0;
+      }
     }
 
     function renderList() {
       if (!listEl) return;
-      const read = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      if (!notifs.length) {
-        listEl.innerHTML = '<div class="nav-notif-empty">No notifications</div>';
+      const visible = getVisible();
+      const read    = getRead();
+
+      if (!visible.length) {
+        listEl.innerHTML = '<div class="nav-notif-empty">You\'re all caught up 🎉</div>';
         return;
       }
-      listEl.innerHTML = notifs.map(n => {
+
+      listEl.innerHTML = visible.map(n => {
         const isRead = read.includes(n.id);
-        return `<div class="nav-notif-item${isRead ? ' read' : ''}" data-id="${n.id}">
-          <span class="nav-notif-icon">${n.icon}</span>
-          <div class="nav-notif-body">
-            <p class="nav-notif-text">${n.text}</p>
-            <span class="nav-notif-time">${n.time}</span>
-          </div>
-          ${isRead ? '' : '<span class="nav-notif-dot"></span>'}
-        </div>`;
+        return `
+          <div class="nav-notif-item${isRead ? ' read' : ''}" data-id="${n.id}">
+            <span class="nav-notif-icon">${n.icon}</span>
+            <div class="nav-notif-body">
+              <p class="nav-notif-text">${n.text}</p>
+              <span class="nav-notif-time">${n.time}</span>
+            </div>
+            ${isRead ? '' : '<span class="nav-notif-dot"></span>'}
+            <div class="nav-notif-actions">
+              ${!isRead ? `
+              <button class="nav-notif-action-btn mark-read" title="Mark as read" data-id="${n.id}">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </button>` : ''}
+              <button class="nav-notif-action-btn dismiss" title="Dismiss" data-id="${n.id}">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </div>`;
       }).join('');
-      listEl.querySelectorAll('.nav-notif-item:not(.read)').forEach(item => {
-        item.addEventListener('click', () => {
-          const id = Number(item.dataset.id);
-          const r  = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+      /* Mark-as-read buttons */
+      listEl.querySelectorAll('.nav-notif-action-btn.mark-read').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const id = Number(btn.dataset.id);
+          const r  = getRead();
           if (!r.includes(id)) { r.push(id); localStorage.setItem(storageKey, JSON.stringify(r)); }
+          renderBadge(); renderList();
+        });
+      });
+
+      /* Dismiss buttons */
+      listEl.querySelectorAll('.nav-notif-action-btn.dismiss').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const id = Number(btn.dataset.id);
+          const d  = getDismissed();
+          if (!d.includes(id)) { d.push(id); localStorage.setItem(DISMISSED_KEY, JSON.stringify(d)); }
           renderBadge(); renderList();
         });
       });
@@ -224,7 +266,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.stopPropagation();
         const isOpen = !notifPanel.hidden;
         notifPanel.hidden = isOpen;
-        /* Close profile popup if open */
         if (profilePopup) { profilePopup.hidden = true; if (navUserEl) navUserEl.setAttribute('aria-expanded', 'false'); }
       });
     }
@@ -232,7 +273,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (clearBtn) {
       clearBtn.addEventListener('click', e => {
         e.stopPropagation();
-        localStorage.setItem(storageKey, JSON.stringify(notifs.map(n => n.id)));
+        const ids = getVisible().map(n => n.id);
+        localStorage.setItem(storageKey, JSON.stringify(ids));
         renderBadge(); renderList();
       });
     }
@@ -264,6 +306,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!r.ok) return;
     data = await r.json();
   } catch (_) { return; }
+
+  /* ── Stats Count-up utility ── */
+  function animateValue(obj, start, end, duration) {
+    if (!obj) return;
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      obj.innerHTML = Math.floor(progress * (end - start) + start);
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }
 
   // User greeting
   const greetingEl = document.getElementById('dash-greeting');
@@ -309,12 +366,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         ringPct.style.strokeDashoffset = circ * (1 - pct / 100);
       }, 200);
     }
-    if (ringNum) ringNum.textContent = pct;
+    if (ringNum) animateValue(ringNum, 0, pct, 1400);
   }
 
   // Streak number
   const streakEl = document.getElementById('study-streak');
-  if (streakEl && data.streak != null) streakEl.textContent = data.streak;
+  if (streakEl && data.streak != null) animateValue(streakEl, 0, data.streak, 1000);
 
   // Streak week dots (Mon–Sun, last `streak` days marked active)
   const streakContainer = document.getElementById('streak-week');
@@ -334,16 +391,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Task counts + progress bar
+  // Task counts + progress bar + interactive rows
   const doneEl    = document.getElementById('tasks-done');
   const pendingEl = document.getElementById('tasks-pending');
-  if (doneEl    && data.completedTasks != null) doneEl.textContent    = data.completedTasks;
-  if (pendingEl && data.pendingTasks   != null) pendingEl.textContent = data.pendingTasks;
-  if (data.completedTasks != null && data.pendingTasks != null) {
-    const total = data.completedTasks + data.pendingTasks;
-    const pct   = total > 0 ? Math.round((data.completedTasks / total) * 100) : 0;
-    const taskFillEl = document.getElementById('task-progress-fill');
-    if (taskFillEl) setTimeout(() => { taskFillEl.style.width = pct + '%'; }, 200);
+  const taskFillEl = document.getElementById('task-progress-fill');
+  const taskContainer = document.getElementById('dash-tasks-container');
+
+  function updateTaskStats() {
+    const total = 4; // Mock total
+    const doneItems = taskContainer.querySelectorAll('.task-item.is-done').length;
+    const pending = total - doneItems;
+    const pct = Math.round((doneItems / total) * 100);
+
+    if (doneEl) doneEl.textContent = doneItems;
+    if (pendingEl) pendingEl.textContent = pending;
+    if (taskFillEl) taskFillEl.style.width = pct + '%';
+  }
+
+  if (taskContainer) {
+    const mockTasks = [
+      { id: 1, text: 'Review Verbal flashcards', done: true },
+      { id: 2, text: 'Numerical drills (30 min)', done: true },
+      { id: 3, text: 'Analytical mock questions', done: false },
+      { id: 4, text: 'Clerical ability drill', done: false },
+    ];
+
+    taskContainer.innerHTML = mockTasks.map(t => `
+      <div class="task-item${t.done ? ' is-done' : ''}" data-id="${t.id}">
+        <div class="task-checkbox">
+          <span class="material-symbols-outlined">check</span>
+        </div>
+        <span class="task-label">${t.text}</span>
+      </div>
+    `).join('');
+
+    taskContainer.querySelectorAll('.task-item').forEach(item => {
+      item.addEventListener('click', () => {
+        item.classList.toggle('is-done');
+        updateTaskStats();
+      });
+    });
+
+    updateTaskStats();
   }
 
   // Competency Radar chart
@@ -455,9 +544,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       .join('');
   }
 
-  // Recommended focus
+  // Recommended focus with context icon
   const focusEl = document.getElementById('recommended-focus');
-  if (focusEl && data.recommendedFocus) focusEl.textContent = data.recommendedFocus;
+  const focusIconEl = document.querySelector('.focus-card-icon .material-symbols-outlined');
+  
+  if (focusEl && data.recommendedFocus) {
+    focusEl.textContent = data.recommendedFocus;
+    if (focusIconEl) {
+      const txt = data.recommendedFocus.toLowerCase();
+      if (txt.includes('verbal')) focusIconEl.textContent = 'record_voice_over';
+      else if (txt.includes('numerical')) focusIconEl.textContent = 'calculate';
+      else if (txt.includes('analytical')) focusIconEl.textContent = 'analytics';
+      else if (txt.includes('clerical')) focusIconEl.textContent = 'inventory_2';
+      else focusIconEl.textContent = 'auto_stories';
+    }
+  }
 
   // Diagnostic score + gap-to-passing bar
   if (data.diagnostic && data.diagnostic.latestScore != null) {

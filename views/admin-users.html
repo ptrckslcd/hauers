@@ -34,10 +34,7 @@
           <div class="admin-kpi-header">
             <span class="card-label">Total Reviewees</span>
             <span class="admin-kpi-icon admin-kpi-icon--blue">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
+              <span class="material-symbols-outlined">group</span>
             </span>
           </div>
           <div class="admin-kpi-val" id="kpi-total">—</div>
@@ -48,9 +45,7 @@
           <div class="admin-kpi-header">
             <span class="card-label">Verified</span>
             <span class="admin-kpi-icon admin-kpi-icon--green">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
+              <span class="material-symbols-outlined">verified</span>
             </span>
           </div>
           <div class="admin-kpi-val" id="kpi-verified">—</div>
@@ -61,10 +56,7 @@
           <div class="admin-kpi-header">
             <span class="card-label">Professional</span>
             <span class="admin-kpi-icon admin-kpi-icon--orange">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-              </svg>
+              <span class="material-symbols-outlined">workspace_premium</span>
             </span>
           </div>
           <div class="admin-kpi-val" id="kpi-professional">—</div>
@@ -75,9 +67,7 @@
           <div class="admin-kpi-header">
             <span class="card-label">Sub-professional</span>
             <span class="admin-kpi-icon admin-kpi-icon--pink">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-              </svg>
+              <span class="material-symbols-outlined">school</span>
             </span>
           </div>
           <div class="admin-kpi-val" id="kpi-subpro">—</div>
@@ -93,6 +83,13 @@
           <button class="rm-filter-chip active" data-filter="level" data-val="all">All</button>
           <button class="rm-filter-chip" data-filter="level" data-val="Professional">Professional</button>
           <button class="rm-filter-chip" data-filter="level" data-val="Sub-professional">Sub-professional</button>
+        </div>
+        <div class="rm-filter-row">
+          <span class="rm-filter-label">Engagement</span>
+          <button class="rm-filter-chip active" data-filter="eng" data-val="all">All</button>
+          <button class="rm-filter-chip" data-filter="eng" data-val="active">Active</button>
+          <button class="rm-filter-chip" data-filter="eng" data-val="idle">Idle</button>
+          <button class="rm-filter-chip" data-filter="eng" data-val="inactive">Inactive</button>
         </div>
         <div class="rm-filter-row">
           <span class="rm-filter-label">Status</span>
@@ -125,8 +122,8 @@
               <th>User</th>
               <th>Exam Level</th>
               <th>Readiness</th>
-              <th>Streak</th>
-              <th>Joined</th>
+              <th>Engagement</th>
+              <th>Last Active</th>
               <th>Status</th>
               <th></th>
             </tr>
@@ -167,6 +164,14 @@
     function fmtDate(d)   { return d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'; }
     function readinessClass(s) { if (s == null) return ''; if (s < 50) return ' low'; if (s < 70) return ' warn'; return ''; }
 
+    function getEngagementStatus(lastActive) {
+      if (!lastActive) return { label: 'Inactive', class: 'status-badge--pending' };
+      const days = Math.floor((new Date() - new Date(lastActive)) / (1000 * 60 * 60 * 24));
+      if (days <= 2) return { label: 'Active', class: 'status-badge--verified' };
+      if (days <= 7) return { label: 'Idle', class: 'status-badge--pending' };
+      return { label: 'Inactive', class: 'status-badge--pending', isUrgent: true };
+    }
+
     /* ── Render ──────────────────────────────────────────── */
     const tbody    = document.getElementById('users-tbody');
     const resultEl = document.getElementById('users-result-msg');
@@ -185,6 +190,9 @@
         const badge = u.isVerified
           ? `<span class="status-badge status-badge--verified">Verified</span>`
           : `<span class="status-badge status-badge--pending">Pending</span>`;
+        
+        const eng = getEngagementStatus(u.lastActive);
+        const engBadge = `<span class="status-badge ${eng.class}" style="${eng.isUrgent ? 'background:rgba(239,68,68,0.08);color:#ef4444;border-color:rgba(239,68,68,0.2)' : ''}">${eng.label}</span>`;
 
         return `
           <tr onclick="location.href='/admin/users/${u.id}'" style="cursor:pointer">
@@ -206,8 +214,8 @@
                 </div>
               </div>
             </td>
-            <td>${u.streak ? u.streak + ' day' + (u.streak !== 1 ? 's' : '') : '—'}</td>
-            <td>${fmtDate(u.joinedAt)}</td>
+            <td>${engBadge}</td>
+            <td style="font-size:0.78rem;color:var(--text-subdued)">${fmtDate(u.lastActive)}</td>
             <td>${badge}</td>
             <td><a class="tbl-view-btn" href="/admin/users/${u.id}" onclick="event.stopPropagation()">View →</a></td>
           </tr>`;
@@ -223,6 +231,7 @@
     /* ── Filter state ────────────────────────────────────── */
     let activeLevel  = 'all';
     let activeStatus = 'all';
+    let activeEng    = 'all';
     let searchQuery  = '';
 
     function applyFilters() {
@@ -231,11 +240,15 @@
         const byStatus = activeStatus === 'all'
           || (activeStatus === 'verified' && u.isVerified)
           || (activeStatus === 'pending'  && !u.isVerified);
+        
+        const eng = getEngagementStatus(u.lastActive);
+        const byEng = activeEng === 'all' || eng.label.toLowerCase() === activeEng;
+
         const q        = searchQuery.trim().toLowerCase();
         const bySearch = !q
           || `${u.firstName} ${u.lastName}`.toLowerCase().includes(q)
           || u.email.toLowerCase().includes(q);
-        return byLevel && byStatus && bySearch;
+        return byLevel && byStatus && byEng && bySearch;
       });
     }
 
@@ -250,6 +263,7 @@
         btn.classList.add('active');
         if (type === 'level')  activeLevel  = btn.dataset.val;
         if (type === 'status') activeStatus = btn.dataset.val;
+        if (type === 'eng')    activeEng    = btn.dataset.val;
         renderUsers(applyFilters());
       });
     });

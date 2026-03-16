@@ -46,7 +46,20 @@ router.post('/verify-email', (req, res) => {
   // TODO: verify OTP from email
   // Log the user in using the email stored during signup
   const email = req.session.pendingEmail;
-  const user = email && users.find(u => u.email === email);
+  let user = email && users.find(u => u.email === email);
+
+  if (!user && email) {
+    user = {
+      id: Date.now(),
+      role: 'reviewee',
+      email: email,
+      password: 'password123',
+      firstName: 'New',
+      lastName: 'User'
+    };
+    users.push(user);
+  }
+
   if (user) {
     req.session.user = user;
     delete req.session.pendingEmail;
