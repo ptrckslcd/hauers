@@ -79,16 +79,19 @@ Use this as your exact runbook.
 What to do:
 1. Start at /
 2. Briefly scroll landing page to show branding and purpose.
-3. Open Sign up.
-4. Fill sample values:
+3. In the address bar, type a non-existent route (example: /demo-not-found) and press Enter to show the custom 404 page.
+4. Briefly explain the fallback handling, then return to home (/).
+5. Open Sign up.
+6. Fill sample values:
    - Email: demo@acc.com
    - Password: any sample value (6 digits)
    - Confirm Password: same sample value
-5. Click Sign up.
+7. Click Sign up.
 
 What to say:
 - "Users start at the landing page, then create an account through a guided sign-up flow."
 - "The platform supports a modern authentication UI with terms/privacy links and theme support."
+- "We also handle unknown URLs gracefully through a dedicated 404 page so navigation failures are clear to users."
 
 ### Scene B: Email Verification Flow (2 to 3 minutes)
 
