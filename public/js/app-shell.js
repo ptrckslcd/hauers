@@ -13,7 +13,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const r = await fetch(url);
       if (r.ok) el.innerHTML = await r.text();
-    } catch (_) {}
+    } catch (err) {
+      console.error('Failed to load partial from ' + url, err);
+    }
   }
 
   await Promise.all([
@@ -139,7 +141,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (nppEmail)  nppEmail.textContent  = u.email;
       if (nppRole)   nppRole.textContent   = u.examLevel ? `${u.examLevel} Reviewee` : 'Reviewee';
     }
-  } catch (_) {}
+  } catch (err) {
+    console.error('Failed to load user info', err);
+  }
 
   /* Profile popup links for reviewee */
   const nppEditLink     = document.getElementById('npp-edit-link');
@@ -305,7 +309,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const r = await fetch('/reviewee/api/dashboard');
     if (!r.ok) return;
     data = await r.json();
-  } catch (_) { return; }
+  } catch (err) {
+    console.error('Failed to load dashboard', err);
+    return;
+  }
 
   /* ── Stats Count-up utility ── */
   function animateValue(obj, start, end, duration) {
